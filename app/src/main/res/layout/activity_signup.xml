@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/bkg">
+
+    <TableLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="40dp"
+        android:stretchColumns="1">
+
+        <TableRow
+            android:gravity="center_horizontal">
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/alipay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <EditText
+                    android:id="@+id/editAlipay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="12"
+                    android:hint="支付宝账号"
+                    android:inputType="textPersonName"/>
+                <!--<requestFocus/>-->
+            </android.support.design.widget.TextInputLayout>
+        </TableRow>
+        <TableRow
+            android:gravity="center_horizontal">
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/userTextInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/editTextSignUpUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="20dp"
+                android:ems="12"
+                android:hint="用户名"
+                android:inputType="textPersonName"/>
+            <!--<requestFocus/>-->
+            </android.support.design.widget.TextInputLayout>
+        </TableRow>
+        <TableRow
+            android:gravity="center_horizontal">
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/passwordTextInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/editTextSignUpPaw"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:paddingTop="20dp"
+                android:ems="12"
+                android:hint="密码"
+                android:inputType="textPassword"/>
+            </android.support.design.widget.TextInputLayout>
+        </TableRow>
+    </TableLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="40dp"
+        android:stretchColumns="0">
+        <TableRow>
+            <Button
+                android:layout_width="wrap_content"
+                android:id="@+id/buttonSignUp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/white_button"
+                android:text="注 册"
+                android:gravity="center_horizontal"/>
+
+        </TableRow>
+
+        <TableRow>
+            <Button
+                android:layout_marginTop="20dp"
+                android:layout_width="wrap_content"
+                android:id="@+id/buttonSignUpCancel"
+                android:layout_height="wrap_content"
+                android:background="@drawable/white_button"
+                android:text="取 消" />
+        </TableRow>
+    </TableLayout>
+</LinearLayout>

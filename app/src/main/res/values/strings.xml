@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">Treasure</string>
+    <string name="title_devices">BLE Device Scan</string>
+    <string name="refresh">刷新</string>
+
+    <string name="bt_not_enabled_leaving">User declined to enable Bluetooth, exiting Bluetooth Advertisements.</string>
+    <string name="ble_not_supported">很抱歉，您的手机不支持低功耗蓝牙</string>
+    <string name="bt_not_supported">Bluetooth is not supported on this device.</string>
+    <string name="bt_ads_not_supported">Bluetooth Advertisements are not supported on this device.</string>
+
+    <string name="menu_scan">Scan</string>
+    <string name="menu_stop">Stop</string>
+    <string name="menu_home">防丢</string>
+    <string name="menu_data">求助</string>
+    <string name="menu_setting">设置</string>
+
+    <string name="empty_list">No tasks found</string>
+
+
+    <string name="img_launcher">img</string>
+    <string name="already_scanning">Scanning already started.</string>
+    <string name="notice">"        非常感谢您参与这个活动，本次活动为校园寻宝游戏。需要打开app，当接近宝物时，会有提示，出现提示，即为找到。
+        奖励会在活动结束后统一发放。本次活动的奖励主要考量参与活动的时长，行进路程，扩散消息的人数三个要素"</string>
+
+
+    <string name="task_marked_complete">Task marked complete</string>
+    <string name="task_marked_active">Task marked active</string>
+    <string name="loading_tasks_error">Error while loading tasks</string>
+    <string name="completed_tasks_cleared">Completed tasks cleared</string>
+    <string name="menu_filter">Filter</string>
+    <string name="menu_clear">清除已完成</string>
+    <string name="menu_delete_task">删除</string>
+    <string name="successfully_saved_task_message">TO-DO saved</string>
+    <string name="no_data">No data</string>
+    <string name="loading">LOADING</string>
+
+    <string-array name="list_tasks_array">
+        <item>@string/nav_all</item>
+        <item>@string/nav_active</item>
+        <item>@string/nav_completed</item>
+    </string-array>
+    <string name="nav_all">所有任务</string>
+    <string name="nav_active">当前任务</string>
+    <string name="nav_completed">已完成任务</string>
+    <string name="label_all">All TO-DOs</string>
+    <string name="label_active">Active TO-DOs</string>
+    <string name="label_completed">Completed TO-DOs</string>
+    <string name="no_tasks_all">暂时没有任务，任务来时会有通知。</string>
+    <string name="no_tasks_active">You have no active TO-DOs!</string>
+    <string name="no_tasks_completed">You have no completed TO-DOs!</string>
+
+
+    <string name="task1">本次任务会以前n名获取奖励</string>
+    <string name="task2">本次任务奖励方式为平分机制</string>
+    <string name="task3">本次任务是以</string>
+
+    <string-array name="list_tasks_details">
+        <item>@string/task1</item>
+        <item>@string/task2</item>
+        <item>@string/task3</item>
+    </string-array>
+
+</resources>

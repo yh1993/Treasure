@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@color/primary_dark">
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center|center"
+            android:src="@mipmap/image_1"
+            />
+        <TextView
+            android:id="@+id/user"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="8dp"
+            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:gravity="center"
+                android:text="我的积分"
+                android:typeface ="sans"
+                android:textSize ="16sp"
+                android:textColor="#000000" />
+            <TextView
+                android:id="@+id/points"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="48dp"
+                android:gravity="center"
+                android:text="20"
+                android:typeface ="sans"
+                android:textSize ="16sp"
+                android:textColor="#000000" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+                android:background="#F0F0F0"
+                />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:gravity="center"
+                android:text="获得奖励"
+                android:typeface ="sans"
+                android:textSize ="16sp"
+                android:textColor="#000000" />
+            <TextView
+                android:id="@+id/money"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="48dp"
+                android:gravity="center"
+                android:text="0"
+                android:typeface ="sans"
+                android:textSize ="16sp"
+                android:textColor="#000000" />
+        </LinearLayout>
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#F0F0F0"
+            />
+    </LinearLayout>
+</LinearLayout>

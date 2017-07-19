@@ -1,0 +1,69 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
+
+def supportVersion = "25.0.0"
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.0'
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+    defaultConfig {
+        applicationId "com.dell.treasure"
+        minSdkVersion 21
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+        vectorDrawables.useSupportLibrary = true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        ndk {
+            //选择要添加的对应cpu类型的.so库。
+            abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a'
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+        }
+
+        manifestPlaceholders = [
+                JPUSH_PKGNAME : applicationId,
+                JPUSH_APPKEY : "5726478243a872dc478916a4", //JPush上注册的包名对应的appkey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+greendao {
+    schemaVersion 1
+    daoPackage 'com.dell.treasure.dao'
+    targetGenDir 'src/main/java'
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:' + supportVersion
+    compile 'com.android.support:support-v4:' + supportVersion
+    compile 'com.android.support:design:' + supportVersion
+    compile 'org.greenrobot:greendao:3.2.0'
+    compile 'com.orhanobut:logger:1.13'
+    compile 'cn.jiguang.sdk:jpush:3.0.0'
+    compile 'cn.jiguang.sdk:jcore:1.0.0'
+    testCompile 'junit:junit:4.12'
+    compile files('libs/ksoap2-android-assembly-3.3.0-jar-with-dependencies.jar')
+    compile files('libs/httpmime-4.2.5.jar')
+    compile files('libs/BaiduLBS_Android.jar')
+    compile files('libs/json-lib-2.4-jdk15.jar')
+    compile files('libs/BaiduTraceSDK_v2_1_15.jar')
+    compile files('libs/commons-beanutils-1.7.0.jar')
+}

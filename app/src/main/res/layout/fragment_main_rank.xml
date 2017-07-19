@@ -1,0 +1,78 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="#fcfcfc"
+              android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="45dp"
+        android:id="@+id/title"
+        android:gravity="center_vertical"  >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="排行榜"
+            android:layout_centerInParent="true"
+            android:textSize="20sp"
+            android:textColor="#ffffff" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*">
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/item_name_button"
+                    android:layout_width="1dip"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:text="用户名▼"
+                    android:textSize="10sp"
+                    />
+                <Button
+                    android:id="@+id/item_number_button"
+                    android:layout_width="1dip"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:text="完成任务▼"
+                    android:textSize="10sp"/>
+                <Button
+                    android:id="@+id/item_score_button"
+                    android:layout_width="1dip"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:text="当日积分▼"
+                    android:textSize="10sp"/>
+                <Button
+                    android:id="@+id/item_total_button"
+                    android:layout_width="1dip"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:text="当前收益▼"
+                    android:textSize="10sp"/>
+
+            </TableRow>
+
+        </TableLayout>
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recylerView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</LinearLayout>

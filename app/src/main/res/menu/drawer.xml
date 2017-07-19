@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_item_yes"
+            android:icon="@drawable/abc_btn_radio_material"
+            android:title="首页" />
+        <item
+            android:id="@+id/navigation_item_query"
+            android:icon="@drawable/abc_btn_radio_material"
+            android:title="活动说明" />
+
+        <item
+            android:id="@+id/navigation_item_share"
+            android:icon="@drawable/abc_btn_radio_material"
+            android:title="分享" />
+        <item
+            android:id="@+id/navigation_item_no"
+            android:icon="@drawable/abc_btn_radio_material"
+            android:title="退出" />
+
+    </group>
+
+    <!--<item android:title="设置">-->
+        <!--<menu>-->
+            <!--<item-->
+                <!--android:id="@+id/navigation_item_night"-->
+                <!--android:icon="@drawable/abc_btn_radio_material"-->
+                <!--android:title="关于我们" />-->
+            <!--<item-->
+                <!--android:id="@+id/navigation_item_day"-->
+                <!--android:icon="@drawable/abc_btn_radio_material"-->
+                <!--android:title="退出" />-->
+        <!--</menu>-->
+    <!--</item>-->
+
+</menu>
