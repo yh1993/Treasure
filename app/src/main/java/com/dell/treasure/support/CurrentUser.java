@@ -7,7 +7,7 @@ package com.dell.treasure.support;
 public class CurrentUser {
     private static CurrentUser sUser = new CurrentUser();
 
-    private String username;
+    private String username = null;
     private String userId;
     private String lastId;       //上线的id
     private String taskId ="";       //任务Id
@@ -17,7 +17,7 @@ public class CurrentUser {
     private String endTime = "";      //任务结束
     private String distance ;
     private String tasKind = "0";
-    public boolean isNetConn = true;
+    private boolean isNetConn = false;
 
 
     private CurrentUser(){}

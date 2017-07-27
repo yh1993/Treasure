@@ -35,7 +35,7 @@ public class SplashActivity extends Activity{
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        setContentView(R.layout.splash);
+        setContentView(R.layout.splash);
         Logger.init("result");
         sp = getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
         username = sp.getString(SignInActivity.USERNAME, null);
@@ -52,7 +52,7 @@ public class SplashActivity extends Activity{
                     user.setUserId(userid);
 
                     if(getIntent().getStringExtra("tasKind") != null){
-                        user.setTaskId(getIntent().getStringExtra("tasKind"));
+                        user.setTasKind(getIntent().getStringExtra("tasKind"));
                     }
 
                     if(username.equals("yh")){

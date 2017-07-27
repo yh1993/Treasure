@@ -32,15 +32,17 @@ import org.ksoap2.SoapFault;
 import java.lang.ref.WeakReference;
 
 
+
 /**
  * Created by hp on 2016/3/17 0017.
  * 登录
+ * 默认记住密码和自动登录
  */
 public class SignInActivity extends Activity{
     private EditText TextUsername;
     private EditText TextPassword;
-    private CheckBox checkBoxRemPSW;
-    private CheckBox checkBoxAutoSignIn;
+//    private CheckBox checkBoxRemPSW;
+//    private CheckBox checkBoxAutoSignIn;
     private ProgressDialog pDialog = null;
 
     public static final String USER_INFO = "password";
@@ -71,30 +73,30 @@ public class SignInActivity extends Activity{
         mForgetPasswordButton.setOnClickListener( new ForgetPasswordListener());
         TextUsername = (EditText) findViewById(R.id.editTextSignInUser);
         TextPassword = (EditText) findViewById(R.id.editTextSignInPsw);
-        checkBoxRemPSW = (CheckBox)findViewById(R.id.checkBoxRemPsw);
-        checkBoxAutoSignIn = (CheckBox)findViewById(R.id.checkBoxAutoSignIn);
+//        checkBoxRemPSW = (CheckBox)findViewById(R.id.checkBoxRemPsw);
+//        checkBoxAutoSignIn = (CheckBox)findViewById(R.id.checkBoxAutoSignIn);
         userTextInput = (TextInputLayout) findViewById(R.id.userTextInput);
         passwordTextInput = (TextInputLayout) findViewById(R.id.passwordTextInput);
 
-        checkBoxAutoSignIn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (checkBoxAutoSignIn.isChecked()){
-                    checkBoxRemPSW.setChecked(true);
-                }
-            }
-        });
-        checkBoxRemPSW.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!checkBoxRemPSW.isChecked()){
-                    checkBoxAutoSignIn.setChecked(false);
-                    TextPassword.setText("");
-                }
-            }
-        });
+//        checkBoxAutoSignIn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (checkBoxAutoSignIn.isChecked()){
+//                    checkBoxRemPSW.setChecked(true);
+//                }
+//            }
+//        });
+//        checkBoxRemPSW.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (!checkBoxRemPSW.isChecked()){
+//                    checkBoxAutoSignIn.setChecked(false);
+//                    TextPassword.setText("");
+//                }
+//            }
+//        });
         sp = this.getSharedPreferences(USER_INFO, Context.MODE_PRIVATE);
-        checkBoxRemPSW.setChecked(sp.getBoolean(REM_PSW,false));
+//        checkBoxRemPSW.setChecked(sp.getBoolean(REM_PSW,false));
         TextUsername.setText(sp.getString(USERNAME, ""));
         TextPassword.setText(sp.getString(PSW,""));
     }
@@ -123,7 +125,7 @@ public class SignInActivity extends Activity{
         myHandler.removeCallbacksAndMessages(null);
     }
 
-    class SignUpClickListener implements View.OnClickListener{
+    private class SignUpClickListener implements View.OnClickListener{
 
         @Override
         public void onClick(View v) {
@@ -131,16 +133,16 @@ public class SignInActivity extends Activity{
             SignInActivity.this.startActivity(intent);
         }
     }
-    class SignInClickListener implements View.OnClickListener{
+    private class SignInClickListener implements View.OnClickListener{
 
         @Override
         public void onClick(View v) {
             checkLogin();
         }
     }
-    class SignInTask extends AsyncTask<Void,Void,String>{
-        private boolean rem_Flag = checkBoxRemPSW.isChecked();
-        private boolean autoSignIn_Flag = checkBoxAutoSignIn.isChecked();
+    private class SignInTask extends AsyncTask<Void,Void,String>{
+//        private boolean rem_Flag = checkBoxRemPSW.isChecked();
+//        private boolean autoSignIn_Flag = checkBoxAutoSignIn.isChecked();
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -174,25 +176,23 @@ public class SignInActivity extends Activity{
                         msg.what = 0x35;
                         break;
                     }
-                    default:
+                    default: {
                         msg.what = 0x36;
                         CurrentUser user = CurrentUser.getOnlyUser();
                         user.setUsername(Sname);
                         user.setUserId(json);
                         SharedPreferences.Editor editor = sp.edit();
-                        if (rem_Flag) {
-                            editor.putBoolean(REM_PSW, true);
-                            editor.putString(USERNAME, Sname);
-                            editor.putString(PSW, Spassword);
-                            editor.putString(USERID,json);
-                            if (autoSignIn_Flag) {
-                                editor.putBoolean(AUTO_SIGNIN, true);
-                            }
-                        } else {
-                            editor.clear();
-                        }
+
+                        editor.putBoolean(REM_PSW, true);
+                        editor.putString(USERNAME, Sname);
+                        editor.putString(PSW, Spassword);
+                        editor.putString(USERID, json);
+
+                        editor.putBoolean(AUTO_SIGNIN, true);
+
                         editor.apply();
                         break;
+                    }
                 }
             }
             myHandler.sendMessage(msg);

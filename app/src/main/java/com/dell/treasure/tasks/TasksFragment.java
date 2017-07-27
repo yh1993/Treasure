@@ -16,6 +16,9 @@
 
 package com.dell.treasure.tasks;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,6 +28,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.PopupMenu;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,20 +37,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-
-import com.dell.treasure.DetailFragment;
 import com.dell.treasure.R;
 import com.dell.treasure.dao.Task;
+import com.dell.treasure.dao.TaskDao;
+import com.dell.treasure.service.AdvertiserService;
+import com.dell.treasure.service.ScannerService;
+import com.dell.treasure.support.CommonUtils;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.MyApp;
+
+import org.greenrobot.greendao.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.sharesdk.onekeyshare.OnekeyShare;
 
 
 public class TasksFragment extends Fragment implements TasksContract.View {
@@ -67,6 +78,10 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 
     private static CurrentUser user;
 
+    private Task task;
+    private TaskDao taskDao;
+    private Context context;
+
     public TasksFragment() {
 
     }
@@ -79,14 +94,74 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         user = CurrentUser.getOnlyUser();
+        context = getActivity();
         mListAdapter = new TasksAdapter(new ArrayList<Task>(0), mItemListener);
 //        mListAdapter = new TasksAdapter(new ArrayList<Task>(0));
+        initData();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mPresenter.start();
+    }
+
+    private void isRestartService() {
+        Intent startScanService = new Intent(context, ScannerService.class);
+        switch (task.getFlag()){
+            case -3:
+                user.setNetConn(false);
+                context.startService(startScanService);
+                break;
+            case 0:
+            case -1:
+                user.setNetConn(true);
+                restartDialog(task.getFlag());
+                break;
+            case -2:
+                break;
+            default:
+                break;
+        }
+    }
+
+    void initData(){
+        taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
+        task = Task.getInstance();
+        Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-3),TaskDao.Properties.Flag.le(0)).build();
+        List<Task> tasks = taskQuery.list();
+        if (tasks.size() > 0) {
+            task.setTask(tasks.get(0));
+            Log.d("result",task.getTaskId());
+            if(!ScannerService.running){
+                isRestartService();
+            }
+        }
+    }
+//提示
+    private void restartDialog(final int flag) {
+        new AlertDialog.Builder(context)
+                .setTitle("提示")
+                .setMessage("您上次任务未结束，是否继续参与？")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent startScanService = new Intent(context, ScannerService.class);
+                        context.startService(startScanService);
+                        Intent startAdvService = new Intent(context, AdvertiserService.class);
+                        if(flag == 0){
+                            context.startService(startAdvService);
+                        }
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     @Override
@@ -309,7 +384,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     public void showTaskDetailsUi(int taskFlag) {
         // in it's own Activity, since it makes more sense that way and it gives us the flexibility
         // to show some Intent stubbing.
-        if(taskFlag == -1) {
+        if(taskFlag == -2) {
             Intent intent = new Intent(getContext(), TaskDetails.class);
             startActivity(intent);
         }
@@ -345,7 +420,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         return isAdded();
     }
 
-    private static class TasksAdapter extends BaseAdapter {
+    private  class TasksAdapter extends BaseAdapter {
 
         private List<Task> mTasks;
         private TaskItemListener mItemListener;
@@ -393,6 +468,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                 holder.money = (TextView) view.findViewById(R.id.money);
                 holder.time = (TextView) view.findViewById(R.id.time);
                 holder.pic = (ImageView) view.findViewById(R.id.imgView);
+                holder.share = (ImageButton) view.findViewById(R.id.btn_share);
 
                 holder.join = (Button) view.findViewById(R.id.join);
                 view.setTag(holder);
@@ -403,8 +479,11 @@ public class TasksFragment extends Fragment implements TasksContract.View {
             holder.time.setText("开始时间:"+ user.getStartTime());
             final Task task = getItem(i);
             switch (task.getFlag()){
-                case -1:
+                case -2:
                     holder.join.setText("未参与");
+                    break;
+                case -1:
+                    holder.join.setText("已参与");
                     break;
                 case 0:
                     holder.join.setText("已参与");
@@ -419,6 +498,12 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                     holder.join.setText("任务过期");
                     break;
             }
+            holder.share.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showShare();
+                }
+            });
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -429,11 +514,12 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 
             return view;
         }
-        static class ViewHolder{
+         class ViewHolder{
             ImageView pic;
             TextView money;
             TextView time;
             Button join;
+            ImageButton share;
         }
     }
 
@@ -444,6 +530,34 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 //        void onCompleteTaskClick(Task completedTask);
 //
 //        void onActivateTaskClick(Task activatedTask);
+    }
+
+    private void showShare() {
+        OnekeyShare oks = new OnekeyShare();
+        //关闭sso授权
+        oks.disableSSOWhenAuthorize();
+
+        // 分享时Notification的图标和文字  2.5.9以后的版本不     调用此方法
+        //oks.setNotification(R.drawable.ic_launcher, getString(R.string.app_name));
+        // title标题，印象笔记、邮箱、信息、微信、人人网和QQ空间使用
+        oks.setTitle(getString(R.string.share));
+        // titleUrl是标题的网络链接，仅在人人网和QQ空间使用
+        oks.setTitleUrl("http://sharesdk.cn");
+        // text是分享文本，所有平台都需要这个字段
+        oks.setText("邀请您参加寻宝任务，一起分享奖励");
+        // imagePath是图片的本地路径，Linked-In以外的平台都支持此参数
+        oks.setImagePath(CommonUtils.copyImgToSD(getActivity(), R.drawable.demo_share_invite , "invite"));//确保SDcard下面存在此张图片
+        // url仅在微信（包括好友和朋友圈）中使用
+        oks.setUrl("http://sharesdk.cn");
+        // comment是我对这条分享的评论，仅在人人网和QQ空间使用
+        oks.setComment("我是测试评论文本");
+        // site是分享此内容的网站名称，仅在QQ空间使用
+        oks.setSite(getString(R.string.app_name));
+        // siteUrl是分享此内容的网站地址，仅在QQ空间使用
+        oks.setSiteUrl("http://sharesdk.cn");
+
+        // 启动分享GUI
+        oks.show(getActivity());
     }
 
 }

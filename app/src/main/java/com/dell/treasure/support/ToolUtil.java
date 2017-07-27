@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -122,8 +123,8 @@ public class ToolUtil {
     }
 
     public static Date stringToDate(String s){
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-        Date date = new Date();
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+        Date date = null;
         try {
             date = sd.parse(s);
         } catch (ParseException e) {
@@ -136,23 +137,6 @@ public class ToolUtil {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getService(context,matchId,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP,triggerAtMillis,pendingIntent);
-    }
-
-    /**
-     * 判断应用是否已启动
-     * @param context
-     * @param packageName  要判断的应用包名
-     * @return boolean
-     */
-    public static boolean isAppAlive(Context context,String packageName){
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> processInfos = activityManager.getRunningAppProcesses();
-
-        for (int i = 0; i < processInfos.size(); i++) {
-            if(processInfos.get(i).processName.equals(packageName))
-                return true;
-        }
-        return false;
     }
 }
 

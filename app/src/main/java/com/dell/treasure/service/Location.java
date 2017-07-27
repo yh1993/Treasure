@@ -128,11 +128,11 @@ public class Location extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0x34:
-                    Toast.makeText(getApplicationContext(), "恭喜，您已经发现宝物。", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "恭喜，您已经发现宝物，任务结束会统一发放奖励。", Toast.LENGTH_SHORT).show();
                     ScannerService.isFirst = 1;
                     break;
                 case 0x35:
-                    Toast.makeText(getApplicationContext(), "其他人已经发现宝物。", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "其他人已经发现宝物，任务结束会统一发放奖励。", Toast.LENGTH_SHORT).show();
                     ScannerService.isFirst = 1;
                     break;
                 case 0x36:

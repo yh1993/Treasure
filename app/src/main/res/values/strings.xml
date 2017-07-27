@@ -1,38 +1,38 @@
 <resources>
-    <string name="app_name">Treasure</string>
-    <string name="title_devices">BLE Device Scan</string>
+    <string name="app_name">校园寻宝</string>
+    <string name="title_devices">蓝牙设备发现</string>
     <string name="refresh">刷新</string>
 
     <string name="bt_not_enabled_leaving">User declined to enable Bluetooth, exiting Bluetooth Advertisements.</string>
-    <string name="ble_not_supported">很抱歉，您的手机不支持低功耗蓝牙</string>
+    <string name="ble_not_supported">很抱歉，您的手机不支持低功耗蓝牙，暂时无法参与任务</string>
     <string name="bt_not_supported">Bluetooth is not supported on this device.</string>
-    <string name="bt_ads_not_supported">Bluetooth Advertisements are not supported on this device.</string>
+    <string name="bt_ads_not_supported">很抱歉，您的设备还不支持低功耗蓝牙广播。暂时无法参与任务。</string>
 
-    <string name="menu_scan">Scan</string>
-    <string name="menu_stop">Stop</string>
+    <string name="menu_scan">扫描</string>
+    <string name="menu_stop">停止</string>
     <string name="menu_home">防丢</string>
     <string name="menu_data">求助</string>
     <string name="menu_setting">设置</string>
 
-    <string name="empty_list">No tasks found</string>
+    <string name="empty_list">没有任务发现</string>
 
 
-    <string name="img_launcher">img</string>
-    <string name="already_scanning">Scanning already started.</string>
+    <string name="img_launcher">图片</string>
+    <string name="already_scanning">扫描已经开始.</string>
     <string name="notice">"        非常感谢您参与这个活动，本次活动为校园寻宝游戏。需要打开app，当接近宝物时，会有提示，出现提示，即为找到。
         奖励会在活动结束后统一发放。本次活动的奖励主要考量参与活动的时长，行进路程，扩散消息的人数三个要素"</string>
 
 
     <string name="task_marked_complete">Task marked complete</string>
     <string name="task_marked_active">Task marked active</string>
-    <string name="loading_tasks_error">Error while loading tasks</string>
+    <string name="loading_tasks_error">载入时出错...</string>
     <string name="completed_tasks_cleared">Completed tasks cleared</string>
-    <string name="menu_filter">Filter</string>
+    <string name="menu_filter">过滤</string>
     <string name="menu_clear">清除已完成</string>
     <string name="menu_delete_task">删除</string>
     <string name="successfully_saved_task_message">TO-DO saved</string>
     <string name="no_data">No data</string>
-    <string name="loading">LOADING</string>
+    <string name="loading">载入中。。。</string>
 
     <string-array name="list_tasks_array">
         <item>@string/nav_all</item>
@@ -42,12 +42,12 @@
     <string name="nav_all">所有任务</string>
     <string name="nav_active">当前任务</string>
     <string name="nav_completed">已完成任务</string>
-    <string name="label_all">All TO-DOs</string>
-    <string name="label_active">Active TO-DOs</string>
-    <string name="label_completed">Completed TO-DOs</string>
+    <string name="label_all">所有任务</string>
+    <string name="label_active">待完成</string>
+    <string name="label_completed">已完成</string>
     <string name="no_tasks_all">暂时没有任务，任务来时会有通知。</string>
-    <string name="no_tasks_active">You have no active TO-DOs!</string>
-    <string name="no_tasks_completed">You have no completed TO-DOs!</string>
+    <string name="no_tasks_active">暂时没有待完成的任务，休息一下吧</string>
+    <string name="no_tasks_completed">你还没有已完成的任务。。。</string>
 
 
     <string name="task1">本次任务会以前n名获取奖励</string>
@@ -59,5 +59,25 @@
         <item>@string/task2</item>
         <item>@string/task3</item>
     </string-array>
+
+    <string name="share">分享</string>
+    <string name="share_text">你有一份邀请红包待领取。。。</string>
+    <string name="invite_user">邀请用户</string>
+    <string name="invite_user_title">你的ID是&lt;font color=\'#4e8bed\'&gt;%s&lt;/font&gt;,邀请用户各奖励10元红包</string>
+    <string name="change_id">换一个ID</string>
+    <string name="get_reward">呼朋唤友 拿红包</string>
+    <string name="invite_user_text">邀请好友注册，双方各奖励10元红包</string>
+    <string name="invite_user_content">邀请好友注册，双方各奖励&lt;font color=\'#4e8bed\'&gt;10元&lt;/font&gt;红包。</string>
+    <string name="share_to_friends">快速分享给好友</string>
+    <string name="more_detail_rules">更多详细规则</string>
+    <string name="invite_register_success">你好，%s \n 注册成功</string>
+    <string name="invite_register_person">邀请人ID：%s \n 双方各获得10元优惠券</string>
+    <string name="invite_share_titel">邀请你注册得10元红包</string>
+
+    <string name="path">路径path</string>
+    <string name="source">来源source</string>
+    <string name="param">参数</string>
+    <string name="close">关闭</string>
+
 
 </resources>

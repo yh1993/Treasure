@@ -14,31 +14,17 @@ import com.baidu.trace.LocationMode;
 import com.baidu.trace.Trace;
 import com.dell.treasure.dao.DaoMaster;
 import com.dell.treasure.dao.DaoSession;
-import com.dell.treasure.dao.Task;
-import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.service.LocationService;
+import com.mob.MobApplication;
 
 import org.greenrobot.greendao.database.Database;
-import org.greenrobot.greendao.query.Query;
-
-import java.util.List;
 
 import cn.jpush.android.api.JPushInterface;
 
 /**
  * 全局信息
  */
-public class MyApp extends Application {
-//    private String username;
-//    private String userId;
-//    private String lastId;       //上线的id
-//    private String taskId ="";       //任务Id
-//    private String target_ble ="";   //目标蓝牙Mac
-//    private String startTime = "";    //任务开始时间
-//    private String beginTime = "";    //接受任务并开始的时间
-//    private String endTime = "";      //任务结束
-//    private String distance ;
-//    public boolean isNetConn = true;
+public class MyApp extends MobApplication {
 
     public static final String TAG = "Myapp";
     public LocationService locationService;
@@ -59,80 +45,6 @@ public class MyApp extends Application {
 
     //轨迹服务类型（0 : 不建立socket长连接， 1 : 建立socket长连接但不上传位置数据，2 : 建立socket长连接并上传位置数据）
     private int traceType = 2;
-
-//    public String getUsername() { return username; }
-//
-//    public String getUserId() {
-//        return userId;
-//    }
-//
-//    public String getLastId() {
-//        return lastId;
-//    }
-//
-//    public String getTaskId() {
-//        return taskId;
-//    }
-//
-//    public String getTarget_ble() {
-//        return target_ble;
-//    }
-//
-//    public String getBeginTime() {
-//        return beginTime;
-//    }
-//
-//    public String getEndTime() {
-//        return endTime;
-//    }
-//
-//    public String getDistance() {
-//        return distance;
-//    }
-//
-//    public String getStartTime() {
-//        return startTime;
-//    }
-//
-//    public boolean isNetConn() {
-//        return isNetConn;
-//    }
-//
-//    public void setUsername(String name) { this.username = name; }
-//
-//    public void setUserId(String userId) {
-//        this.userId = userId;
-//    }
-//
-//    public void setTarget_ble(String target_ble) {
-//        this.target_ble = target_ble;
-//    }
-//
-//    public void setLastId(String lastId) { this.lastId = lastId; }
-//
-//    public void setTaskId(String taskId) {
-//        this.taskId = taskId;
-//    }
-//
-//    public void setBeginTime(String beginTime) {
-//        this.beginTime = beginTime;
-//    }
-//
-//    public void setNetConn(boolean isNetConn){
-//        this.isNetConn = isNetConn;
-//    }
-//
-//    public void setEndTime(String endTime) {
-//        this.endTime = endTime;
-//    }
-//
-//    public void setDistance(String distance) {
-//        this.distance = distance;
-//    }
-//
-//    public void setStartTime(String startTime) {
-//        this.startTime = startTime;
-//    }
 
     @Override
     public void onCreate() {
@@ -229,15 +141,5 @@ public class MyApp extends Application {
         return appCount;
     }
 
-    public void initData(){
-        Query<Task> taskQuery = getDaoSession().getTaskDao().queryBuilder().where(TaskDao.Properties.Flag.eq(0)).build();
-        List<Task> tasks = taskQuery.list();
-        if(tasks.size() > 0) {
-            Task task = tasks.get(0);
-            task.setLastId(user.getLastId());
-            task.setBeginTime(user.getBeginTime());
-            task.setFlag(0);
-        }
-    }
 
 }

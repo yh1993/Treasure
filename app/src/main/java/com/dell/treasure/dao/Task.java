@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Transient;
 import org.greenrobot.greendao.annotation.Unique;
 
 /**
@@ -13,6 +14,7 @@ import org.greenrobot.greendao.annotation.Unique;
  */
 @Entity
 public class Task implements Parcelable{
+    // 虽然不是单例，但也可以用来标记当前任务
     @Id(autoincrement = true)
     private Long id;
 
@@ -24,7 +26,9 @@ public class Task implements Parcelable{
     private String endTime;
 //    private boolean isFinish;
 //    private boolean isSubmit;
-    private int flag; //-1 未参与 0 参与中，未结束  1 结束，未提交  2 提交  3 过期作废
+    private int flag; //-3 未联网，不能参与 -2 未参与 -1 参与中，未结束  0 参与中，开广播  1 结束，未提交  2 提交  3 过期作废
+    @Transient
+    private static Task instance = new Task();
     @Generated(hash = 960743891)
     public Task(Long id, String lastId, String taskId, String targetBle,
             String beginTime, String endTime, int flag) {
@@ -39,7 +43,19 @@ public class Task implements Parcelable{
     @Generated(hash = 733837707)
     public Task() {
     }
+    public static Task getInstance(){
+        return instance;
+    }
 
+    public void setTask(Task task){
+        this.id = task.id;
+        this.lastId = task.lastId;
+        this.taskId = task.taskId;
+        this.targetBle = task.targetBle;
+        this.beginTime = task.beginTime;
+        this.endTime = task.endTime;
+        this.flag = task.flag;
+    }
     protected Task(Parcel in) {
         id = in.readLong();
         lastId = in.readString();

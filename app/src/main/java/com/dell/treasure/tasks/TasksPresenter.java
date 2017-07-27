@@ -85,15 +85,17 @@ public class TasksPresenter implements TasksContract.Presenter {
                 for (Task task : tasks) {
                     switch (mCurrentFiltering) {
                         case ALL_TASKS:
-                            tasksToShow.add(task);
+                            if (task.getFlag() > -3) {
+                                tasksToShow.add(task);
+                            }
                             break;
                         case ACTIVE_TASKS:
-                            if (task.getFlag() < 2) {
+                            if (task.getFlag() < 2 && task.getFlag() > -3) {
                                 tasksToShow.add(task);
                             }
                             break;
                         case COMPLETED_TASKS:
-                            if (task.getFlag() == 2) {
+                            if (task.getFlag() == 2 || task.getFlag() == 3) {
                                 tasksToShow.add(task);
                             }
                             break;

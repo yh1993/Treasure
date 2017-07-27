@@ -53,24 +53,24 @@
             </android.support.design.widget.TextInputLayout>
         </TableRow>
     </TableLayout>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center">
-        <CheckBox
-            android:layout_marginRight="5dp"
-            android:id ="@+id/checkBoxRemPsw"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="记住密码"/>
-        <CheckBox
-            android:layout_marginLeft="5dp"
-            android:id ="@+id/checkBoxAutoSignIn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="自动登录"/>
-    </LinearLayout>
+    <!--<LinearLayout-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:gravity="center">-->
+        <!--<CheckBox-->
+            <!--android:layout_marginRight="5dp"-->
+            <!--android:id ="@+id/checkBoxRemPsw"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="记住密码"/>-->
+        <!--<CheckBox-->
+            <!--android:layout_marginLeft="5dp"-->
+            <!--android:id ="@+id/checkBoxAutoSignIn"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="自动登录"/>-->
+    <!--</LinearLayout>-->
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -17,7 +17,7 @@
         <item
             android:id="@+id/navigation_item_share"
             android:icon="@drawable/abc_btn_radio_material"
-            android:title="分享" />
+            android:title="邀请朋友" />
         <item
             android:id="@+id/navigation_item_no"
             android:icon="@drawable/abc_btn_radio_material"

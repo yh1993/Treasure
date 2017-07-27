@@ -14,7 +14,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.dell.treasure.support.CurrentUser;
-import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
 
 import net.sf.json.JSONArray;
@@ -36,7 +35,6 @@ public class UserInfo extends Service {
         super.onCreate();
         Log.d("result","UserInfo start");
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
-//        MyApp myApp = MyApp.getInstance();
         CurrentUser user = CurrentUser.getOnlyUser();
         username = user.getUsername();
         new UserTask().execute();

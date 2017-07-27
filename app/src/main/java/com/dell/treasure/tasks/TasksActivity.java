@@ -26,7 +26,9 @@ import android.widget.TextView;
 
 import com.dell.treasure.R;
 import com.dell.treasure.SignInActivity;
+import com.dell.treasure.service.NetService;
 import com.dell.treasure.service.UserInfo;
+import com.dell.treasure.share.InviteActivity;
 import com.dell.treasure.source.TasksRepository;
 import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.ActivityUtils;
@@ -148,7 +150,7 @@ public class TasksActivity extends AppCompatActivity {
         }
         isFirstSign();
         if(!userInfo.getTasKind().equals("0")){
-            startActivity(new Intent(TasksActivity.this,TaskDetails.class));
+            startService(new Intent(TasksActivity.this,NetService.class));
         }
     }
 
@@ -201,6 +203,12 @@ public class TasksActivity extends AppCompatActivity {
                 case R.id.navigation_item_no:
 //                    helpType = 2;
                     exit();
+                    break;
+                case R.id.navigation_item_share:
+//                    helpType = 2;
+                    Intent intent = new Intent(TasksActivity.this, InviteActivity.class);
+                    startActivity(intent);
+                    item.setCheckable(false);
                     break;
                 default:
                     break;

@@ -170,7 +170,8 @@ public class TasksRepository implements TasksDataSource {
         Iterator<Map.Entry<Long, Task>> it = mCachedTasks.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Long, Task> entry = it.next();
-            if (entry.getValue().getFlag() == 2) {
+            int key = entry.getValue().getFlag();
+            if (key == 2 || key == 3) {
                 it.remove();
             }
         }

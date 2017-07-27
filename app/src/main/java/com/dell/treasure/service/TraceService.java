@@ -20,6 +20,7 @@ import com.orhanobut.logger.Logger;
 
 /**
  * Created by DELL on 2016/11/30.
+ * 轨迹上传
  */
 
 public class TraceService extends Service {

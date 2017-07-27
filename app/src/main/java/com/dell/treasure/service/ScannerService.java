@@ -1,6 +1,5 @@
 package com.dell.treasure.service;
 
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -12,14 +11,15 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.IBinder;
-import android.view.WindowManager;
 
 import com.dell.treasure.R;
+import com.dell.treasure.dao.Task;
 import com.dell.treasure.support.Adaptive_Inquiry;
+import com.dell.treasure.support.AppSurvice;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.StartTask;
 import com.dell.treasure.tasks.TasksActivity;
 import com.orhanobut.logger.Logger;
 
@@ -32,8 +32,11 @@ import static com.dell.treasure.support.NotificationHelper.sendExpandedNotice;
 
 /**
  * Created by DELL on 2016/8/23.
- * 注意 TargetBle 是否为null
- * 是否联网
+ * 开启一个BLE循环扫描的线程，扫描根据周围邻居数量
+ * 主要关注：
+ * 1.TargetBle 是否为null  是否联网
+ * 2.联网    发现上报，修改为直接上报  (只有参与任务才开启扫描)
+ * 3.不联网  扫描发现任务   跳转到 TaskDetails 任务参与界面
  */
 public class ScannerService extends Service {
     public static boolean running = false;
@@ -46,12 +49,14 @@ public class ScannerService extends Service {
     private ScanCallback mScanCallback;
 
     private String bleId;
+    private Task task;
 
     @Override
     public void onCreate() {
         running = true;
         user = CurrentUser.getOnlyUser();
         bleId = user.getTarget_ble();
+        task = Task.getInstance();
         initialize();
         super.onCreate();
     }
@@ -63,7 +68,7 @@ public class ScannerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        user.setNetConn(intent.getBooleanExtra("NetConn",false));
+//        user.setNetConn(intent.getBooleanExtra("NetConn",false));
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -73,6 +78,9 @@ public class ScannerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(task.getFlag() == 0 || task.getFlag() == -1){
+            StartTask.endTask(this);
+        }
         running = false;
         resetting();
         if(deviceLiveThread!=null){
@@ -92,6 +100,7 @@ public class ScannerService extends Service {
                 }
             }
         }
+
         startDeviceLiving();
     }
 
@@ -100,7 +109,12 @@ public class ScannerService extends Service {
             // Kick off a new scan.
             mScanCallback = new SampleScanCallback();
         }
+        if(task.getFlag() == 0 || task.getFlag() == -1){
+            StartTask.init();
+            StartTask.startTask(this);
+        }
         mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
+
     }
 
     private List<ScanFilter> buildScanFilters() {
@@ -127,7 +141,6 @@ public class ScannerService extends Service {
             String address = result.getDevice().getAddress();
 //            获取广播数据包
             if(!user.isNetConn()){
-                if(!AdvertiserService.running){}
                 try {
                     ScanRecord scanRecord = result.getScanRecord();
                     final byte[] bytes = scanRecord.getManufacturerSpecificData(1);
@@ -138,13 +151,15 @@ public class ScannerService extends Service {
                         user.setLastId(lastId);
                         user.setNetConn(true);
 
-                        Intent passiveIntent = new Intent(getApplicationContext(), TasksActivity.class);
-                        passiveIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        PendingIntent passivePi = PendingIntent.getActivity(getApplicationContext(), 0, passiveIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-                        Intent activeIntent = new Intent(getApplicationContext(), AdvertiserService.class);
-                        PendingIntent activePi = PendingIntent.getService(getApplicationContext(), 0, activeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                        sendExpandedNotice(getApplicationContext(), "求助", "是否愿意帮助扩散求助，此操作会开启蓝牙广播，消耗少许电量。", R.mipmap.ic_launcher, activePi, passivePi);
+                        AppSurvice.isSurvive(getApplicationContext());
+                        stopSelf();
+//                        Intent passiveIntent = new Intent(getApplicationContext(), TasksActivity.class);
+//                        passiveIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//                        PendingIntent passivePi = PendingIntent.getActivity(getApplicationContext(), 0, passiveIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+//
+//                        Intent activeIntent = new Intent(getApplicationContext(), AdvertiserService.class);
+//                        PendingIntent activePi = PendingIntent.getService(getApplicationContext(), 0, activeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+//                        sendExpandedNotice(getApplicationContext(), "求助", "是否愿意帮助扩散求助，此操作会开启蓝牙广播，消耗少许电量。", R.mipmap.ic_launcher, activePi, passivePi);
 
                     }
                 } catch (NullPointerException e) {
@@ -158,27 +173,6 @@ public class ScannerService extends Service {
                         Logger.d("3、找到了 bleid " + bleId);
 
                         startService(positonIntent);
-//                        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-//                        builder.setTitle("恭喜");
-//                        builder.setMessage("宝物就在你的附近，是否愿意上报你的位置，进行确认？");
-//                        builder.setPositiveButton("是", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                positonIntent.putExtra("flag", 1);
-//                                startService(positonIntent);
-//                            }
-//                        });
-//                        builder.setNeutralButton("否", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                positonIntent.putExtra("flag", 0);
-//                                startService(positonIntent);
-//                            }
-//                        });
-//                        AlertDialog alertDialog = builder.create();
-//                        alertDialog.setCanceledOnTouchOutside(false);//点击外面区域不会让dialog消失
-//                        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-//                        alertDialog.show();
                     }
                 }
             }

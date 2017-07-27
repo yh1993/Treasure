@@ -19,14 +19,15 @@ import java.util.List;
 import static com.dell.treasure.support.ToolUtil.dateToString;
 
 /**
- * 判断广播服务是否运行，以广播时长作为用户参与任务时长
+ * 判断广播服务是否运行，以广播时长作为用户参与任务时长 (废弃)
+ * 判断扫描服务是否运行，以参与任务后，开启的扫描时长作为用户参与任务时长
  */
 public class MonitorService extends Service {
     private TaskDao taskDao;
     private Task task;
-    protected static boolean isCheck = false;
-    protected static boolean isRunning = false;
-    private static final String SERVICE_NAME = "com.dell.treasure.service.AdvertiserService";
+    public static boolean isCheck = false;
+    public static boolean isRunning = false;
+    private static final String SERVICE_NAME = "com.dell.treasure.service.ScannerService";
 
     @Override
     public void onCreate() {
@@ -42,7 +43,8 @@ public class MonitorService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO Auto-generated method stub
-        task = intent.getParcelableExtra("Task");
+//        task = intent.getParcelableExtra("Task");
+        task = Task.getInstance();
         Logger.d("任务标志 "+task.getFlag());
         Logger.d("MonitorService onStartCommand");
         new Thread() {
@@ -51,7 +53,7 @@ public class MonitorService extends Service {
                 // TODO Auto-generated method stub
                 while (isCheck) {
                     if (!isServiceWork(getApplicationContext(), SERVICE_NAME)) {
-                        Logger.d("广播服务已停止");
+                        Logger.d("扫描服务已停止");
                         stopSelf();
                     } else {
                         task.setEndTime(dateToString(new Date()));

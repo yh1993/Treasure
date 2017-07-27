@@ -97,4 +97,9 @@
         <item name="android:scaleX">0</item>
         <item name="android:scaleY">0</item>
     </style>
+
+    <style name="Dialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@drawable/demo_dialog_bg</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>

@@ -28,7 +28,6 @@ import java.util.Set;
 import cn.jpush.android.api.JPushInterface;
 import cn.jpush.android.api.TagAliasCallback;
 
-
 /**
  * Created by hp on 2016/3/17 0017.
  * 注册
@@ -57,7 +56,7 @@ public class SignUpActivity extends Activity{
         editAlipay = (TextInputLayout) findViewById(R.id.alipay);
     }
 
-    class SignUpClickListener implements View.OnClickListener{
+    private class SignUpClickListener implements View.OnClickListener{
 
         @Override
         public void onClick(View v) {
@@ -68,7 +67,7 @@ public class SignUpActivity extends Activity{
         }
     }
 
-    class CancelClickListener implements View.OnClickListener{
+    private class CancelClickListener implements View.OnClickListener{
         @Override
         public void onClick(View v) {
             finish();
@@ -85,7 +84,7 @@ public class SignUpActivity extends Activity{
         myHandler.removeCallbacksAndMessages(null);
     }
 
-    class SignUpTask extends AsyncTask<Void, Void, String>{
+    private class SignUpTask extends AsyncTask<Void, Void, String>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
