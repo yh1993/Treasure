@@ -63,10 +63,10 @@ public class JpushReceiver extends BroadcastReceiver {
 
             if(bundle.getString(JPushInterface.EXTRA_ALERT).length()>20) {
 //            if(bundle.getString(JPushInterface.EXTRA_ALERT).equals(user.getTaskId()+" is Done")) {
-                if(TraceService.running){
-                    Intent i = new Intent(context,TraceService.class);
-                    context.stopService(i);
-                }
+//                if(TraceService.running){
+//                    Intent i = new Intent(context,TraceService.class);
+//                    context.stopService(i);
+//                }
                 user.setTarget_ble("");
                 user.setLastId("");
                 ScannerService.isFirst = 0;

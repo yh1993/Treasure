@@ -119,6 +119,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                 restartDialog(task.getFlag());
                 break;
             case -2:
+                user.setNetConn(true);
                 break;
             default:
                 break;

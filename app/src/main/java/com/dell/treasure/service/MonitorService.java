@@ -20,6 +20,7 @@ import static com.dell.treasure.support.ToolUtil.dateToString;
 
 /**
  * 判断广播服务是否运行，以广播时长作为用户参与任务时长 (废弃)
+ *
  * 判断扫描服务是否运行，以参与任务后，开启的扫描时长作为用户参与任务时长
  */
 public class MonitorService extends Service {

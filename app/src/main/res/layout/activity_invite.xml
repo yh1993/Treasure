@@ -59,13 +59,15 @@
             android:textSize="13dp" />
 
     </LinearLayout>
+
     <ImageView
         android:id="@+id/iv_invite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="34dp"
-        android:src="@drawable/demo_invite_reward"/>
+        android:src="@drawable/demo_invite_reward" />
+
     <TextView
         android:id="@+id/tv_invite_title"
         android:layout_width="wrap_content"

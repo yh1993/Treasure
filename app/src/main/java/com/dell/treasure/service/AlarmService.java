@@ -60,10 +60,10 @@ public class AlarmService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(TraceService.running){
-            Intent i = new Intent(this,TraceService.class);
-            stopService(i);
-        }
+//        if(TraceService.running){
+//            Intent i = new Intent(this,TraceService.class);
+//            stopService(i);
+//        }
         myApp = (MyApp) getApplication();
         user = CurrentUser.getOnlyUser();
         user.setTarget_ble("");

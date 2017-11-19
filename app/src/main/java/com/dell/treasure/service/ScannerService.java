@@ -1,6 +1,5 @@
 package com.dell.treasure.service;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -14,20 +13,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
-import com.dell.treasure.R;
 import com.dell.treasure.dao.Task;
 import com.dell.treasure.support.Adaptive_Inquiry;
 import com.dell.treasure.support.AppSurvice;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.StartTask;
-import com.dell.treasure.tasks.TasksActivity;
 import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.dell.treasure.support.NotificationHelper.sendExpandedNotice;
 
 
 /**
@@ -58,6 +53,10 @@ public class ScannerService extends Service {
         bleId = user.getTarget_ble();
         task = Task.getInstance();
         initialize();
+        if(task.getFlag() == 0 || task.getFlag() == -1){
+            StartTask.init();
+            StartTask.startTask(this);
+        }
         super.onCreate();
     }
 
@@ -108,10 +107,6 @@ public class ScannerService extends Service {
         if (mScanCallback == null) {
             // Kick off a new scan.
             mScanCallback = new SampleScanCallback();
-        }
-        if(task.getFlag() == 0 || task.getFlag() == -1){
-            StartTask.init();
-            StartTask.startTask(this);
         }
         mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
 

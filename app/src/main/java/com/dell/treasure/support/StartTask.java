@@ -80,19 +80,12 @@ public class StartTask {
         }
         task.setLastId(user.getLastId());
         task.setBeginTime(user.getBeginTime());
-        task.setFlag(0);
+//        task.setFlag(0);
         Log.d("result",task.getId() + task.getLastId());
         taskDao.update(task);
     }
 
     public static void endTask(Context context){
-        if(user.getEndTime().isEmpty()) {
-            user.setEndTime(dateToString(new Date()));
-        }
-        task.setEndTime(user.getEndTime());
-        task.setFlag(1);
-        taskDao.update(task);
-
         // 停止监听service
         MonitorService.isCheck = false;
         if (null != serviceIntent) {
@@ -101,6 +94,14 @@ public class StartTask {
         if(serviceTrace != null){
             context.startService(serviceTrace);
         }
+
+        //这里记录结束时间，怎么记录待定
+        if(user.getEndTime().isEmpty()) {
+            user.setEndTime(dateToString(new Date()));
+        }
+        task.setEndTime(user.getEndTime());
+        task.setFlag(1);
+        taskDao.update(task);
 
         Logger.d("endtime: "+task.getEndTime()+" 任务标志 "+task.getFlag());
     }
