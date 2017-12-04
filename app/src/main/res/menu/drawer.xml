@@ -13,11 +13,19 @@
             android:id="@+id/navigation_item_query"
             android:icon="@drawable/abc_btn_radio_material"
             android:title="活动说明" />
-
+        <!--<item-->
+            <!--android:id="@+id/navigation_item_register"-->
+            <!--android:icon="@drawable/abc_btn_radio_material"-->
+            <!--android:title="招募排行榜" />-->
         <item
-            android:id="@+id/navigation_item_share"
+            android:id="@+id/navigation_item_task"
             android:icon="@drawable/abc_btn_radio_material"
-            android:title="邀请朋友" />
+            android:title="任务排行榜" />
+
+        <!--<item-->
+            <!--android:id="@+id/navigation_item_share"-->
+            <!--android:icon="@drawable/abc_btn_radio_material"-->
+            <!--android:title="邀请朋友注册" />-->
         <item
             android:id="@+id/navigation_item_no"
             android:icon="@drawable/abc_btn_radio_material"

@@ -17,29 +17,15 @@ public class TaskDao extends AbstractDao<Task, Long> {
 
     public static final String TABLENAME = "TASK";
 
-    /**
-     * Properties of entity Task.<br/>
-     * Can be used for QueryBuilder and for referencing column names.
-     */
-    public static class Properties {
-        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property LastId = new Property(1, String.class, "lastId", false, "LAST_ID");
-        public final static Property TaskId = new Property(2, String.class, "taskId", false, "TASK_ID");
-        public final static Property TargetBle = new Property(3, String.class, "targetBle", false, "TARGET_BLE");
-        public final static Property BeginTime = new Property(4, String.class, "beginTime", false, "BEGIN_TIME");
-        public final static Property EndTime = new Property(5, String.class, "endTime", false, "END_TIME");
-        public final static Property Flag = new Property(6, int.class, "flag", false, "FLAG");
-    }
-
-
     public TaskDao(DaoConfig config) {
         super(config);
     }
-    
+
+
     public TaskDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
     }
-
+    
     /** Creates the underlying database table. */
     public static void createTable(Database db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
@@ -62,32 +48,32 @@ public class TaskDao extends AbstractDao<Task, Long> {
     @Override
     protected final void bindValues(DatabaseStatement stmt, Task entity) {
         stmt.clearBindings();
- 
+
         Long id = entity.getId();
         if (id != null) {
             stmt.bindLong(1, id);
         }
- 
+
         String lastId = entity.getLastId();
         if (lastId != null) {
             stmt.bindString(2, lastId);
         }
- 
+
         String taskId = entity.getTaskId();
         if (taskId != null) {
             stmt.bindString(3, taskId);
         }
- 
+
         String targetBle = entity.getTargetBle();
         if (targetBle != null) {
             stmt.bindString(4, targetBle);
         }
- 
+
         String beginTime = entity.getBeginTime();
         if (beginTime != null) {
             stmt.bindString(5, beginTime);
         }
- 
+
         String endTime = entity.getEndTime();
         if (endTime != null) {
             stmt.bindString(6, endTime);
@@ -98,32 +84,32 @@ public class TaskDao extends AbstractDao<Task, Long> {
     @Override
     protected final void bindValues(SQLiteStatement stmt, Task entity) {
         stmt.clearBindings();
- 
+
         Long id = entity.getId();
         if (id != null) {
             stmt.bindLong(1, id);
         }
- 
+
         String lastId = entity.getLastId();
         if (lastId != null) {
             stmt.bindString(2, lastId);
         }
- 
+
         String taskId = entity.getTaskId();
         if (taskId != null) {
             stmt.bindString(3, taskId);
         }
- 
+
         String targetBle = entity.getTargetBle();
         if (targetBle != null) {
             stmt.bindString(4, targetBle);
         }
- 
+
         String beginTime = entity.getBeginTime();
         if (beginTime != null) {
             stmt.bindString(5, beginTime);
         }
- 
+
         String endTime = entity.getEndTime();
         if (endTime != null) {
             stmt.bindString(6, endTime);
@@ -134,7 +120,7 @@ public class TaskDao extends AbstractDao<Task, Long> {
     @Override
     public Long readKey(Cursor cursor, int offset) {
         return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
-    }    
+    }
 
     @Override
     public Task readEntity(Cursor cursor, int offset) {
@@ -149,7 +135,7 @@ public class TaskDao extends AbstractDao<Task, Long> {
         );
         return entity;
     }
-     
+
     @Override
     public void readEntity(Cursor cursor, Task entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
@@ -160,7 +146,7 @@ public class TaskDao extends AbstractDao<Task, Long> {
         entity.setEndTime(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setFlag(cursor.getInt(offset + 6));
      }
-    
+     
     @Override
     protected final Long updateKeyAfterInsert(Task entity, long rowId) {
         entity.setId(rowId);
@@ -175,7 +161,7 @@ public class TaskDao extends AbstractDao<Task, Long> {
             return null;
         }
     }
-
+    
     @Override
     public boolean hasKey(Task entity) {
         return entity.getId() != null;
@@ -184,6 +170,20 @@ public class TaskDao extends AbstractDao<Task, Long> {
     @Override
     protected final boolean isEntityUpdateable() {
         return true;
+    }
+
+    /**
+     * Properties of entity Task.<br/>
+     * Can be used for QueryBuilder and for referencing column names.
+     */
+    public static class Properties {
+        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
+        public final static Property LastId = new Property(1, String.class, "lastId", false, "LAST_ID");
+        public final static Property TaskId = new Property(2, String.class, "taskId", false, "TASK_ID");
+        public final static Property TargetBle = new Property(3, String.class, "targetBle", false, "TARGET_BLE");
+        public final static Property BeginTime = new Property(4, String.class, "beginTime", false, "BEGIN_TIME");
+        public final static Property EndTime = new Property(5, String.class, "endTime", false, "END_TIME");
+        public final static Property Flag = new Property(6, int.class, "flag", false, "FLAG");
     }
     
 }

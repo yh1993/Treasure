@@ -26,6 +26,20 @@ import java.util.List;
  * Created by DELL on 2016/6/16.
  */
 public class UserInfo extends Service {
+    private final Handler msgHandler = new Handler()
+    {
+        public void handleMessage(Message msg)
+        {
+            switch (msg.what) {
+                case 0x37:
+                    Toast.makeText(UserInfo.this,"从服务器同步奖励失败",Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+            stopSelf();
+        }
+    };
     private Intent intent = new Intent("com.dell.treasure.RECEIVER_UserInfo");
     private LocalBroadcastManager localBroadcastManager;
     private String username;
@@ -86,22 +100,8 @@ public class UserInfo extends Service {
         }
 
         protected void onPostExecute(String file_url) {
+            stopSelf();
         }
 
     }
-
-    private final Handler msgHandler = new Handler()
-    {
-        public void handleMessage(Message msg)
-        {
-            switch (msg.what) {
-                case 0x37:
-                    Toast.makeText(UserInfo.this,"从服务器同步奖励失败",Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
-            stopSelf();
-        }
-    };
 }

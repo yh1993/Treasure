@@ -37,7 +37,7 @@ public interface TasksContract {
 
 //        void showAddTask();
 
-        void showTaskDetailsUi(int taskFlag);
+        void showTaskDetailsUi(Task taskFlag);
 
         void showTaskMarkedComplete();
 
@@ -75,7 +75,7 @@ public interface TasksContract {
 
 //        void addNewTask();
 
-        void openTaskDetails(@NonNull int taskFlag);
+        void openTaskDetails(@NonNull Task taskFlag);
 
         void completeTask(@NonNull Task completedTask);
 
@@ -83,8 +83,8 @@ public interface TasksContract {
 
         void clearCompletedTasks();
 
-        void setFiltering(TasksFilterType requestType);
-
         TasksFilterType getFiltering();
+
+        void setFiltering(TasksFilterType requestType);
     }
 }

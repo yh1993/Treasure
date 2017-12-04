@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -39,23 +40,24 @@ import java.lang.ref.WeakReference;
  * 默认记住密码和自动登录
  */
 public class SignInActivity extends Activity{
-    private EditText TextUsername;
-    private EditText TextPassword;
-//    private CheckBox checkBoxRemPSW;
-//    private CheckBox checkBoxAutoSignIn;
-    private ProgressDialog pDialog = null;
-
+    public static final String TAG = "SignInActivity";
     public static final String USER_INFO = "password";
     public static final String REM_PSW = "remPsw";
     public static final String AUTO_SIGNIN = "autoSignIn";
     public static final String USERNAME = "username";
     public static final String PSW = "password";
     public static final String USERID = "userid";
-    private SharedPreferences sp;
-
-    private TextInputLayout userTextInput,passwordTextInput;
+    public static final String CURRENT_STATE = "currentState";
     private static String Sname;
+    private EditText TextUsername;
+    private EditText TextPassword;
+//    private CheckBox checkBoxRemPSW;
+//    private CheckBox checkBoxAutoSignIn;
+    private ProgressDialog pDialog = null;
+    private SharedPreferences sp;
+    private TextInputLayout userTextInput,passwordTextInput;
     private String Spassword;
+    private String currentState = "000";
 
     private MyHandler myHandler = new MyHandler(this);
 
@@ -99,6 +101,7 @@ public class SignInActivity extends Activity{
 //        checkBoxRemPSW.setChecked(sp.getBoolean(REM_PSW,false));
         TextUsername.setText(sp.getString(USERNAME, ""));
         TextPassword.setText(sp.getString(PSW,""));
+        currentState = sp.getString(CURRENT_STATE,"000");
     }
 
     @Override
@@ -125,6 +128,61 @@ public class SignInActivity extends Activity{
         myHandler.removeCallbacksAndMessages(null);
     }
 
+    private void checkLogin() {
+        // Reset errors.
+        userTextInput.setErrorEnabled(false);
+        passwordTextInput.setErrorEnabled(false);
+
+        Sname = TextUsername.getText().toString();
+        Spassword = TextPassword.getText().toString();
+
+        if (TextUtils.isEmpty(Sname)) {
+            userTextInput.setError("请输入用户名");
+            return;
+        }
+        if (TextUtils.isEmpty(Spassword)) {
+            passwordTextInput.setError("请输入密码");
+            return;
+        }
+        new SignInTask().execute();
+    }
+
+    private static class MyHandler extends Handler{
+        private WeakReference<Context> reference;
+        MyHandler(Context context){
+            reference = new WeakReference<>(context);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            SignInActivity activity = (SignInActivity) reference.get();
+            if(activity != null){
+                switch (msg.what){
+                    case 0x34:
+                        Toast.makeText(activity, "用户名密码错误", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x35:
+                        Toast.makeText(activity, "其他错误", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x36:
+                        Intent i;
+                        if(Sname.equals("yh")){
+                            i = new Intent(activity, DeviceScanActivity.class);
+                        }else{
+                            i = new Intent(activity, TasksActivity.class);
+                        }
+                        activity.startActivity(i);
+                        activity.finish();
+                        break;
+                    case 0x38:
+                        Toast.makeText(activity, "无法连接服务器", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
     private class SignUpClickListener implements View.OnClickListener{
 
         @Override
@@ -133,6 +191,7 @@ public class SignInActivity extends Activity{
             SignInActivity.this.startActivity(intent);
         }
     }
+
     private class SignInClickListener implements View.OnClickListener{
 
         @Override
@@ -140,6 +199,7 @@ public class SignInActivity extends Activity{
             checkLogin();
         }
     }
+
     private class SignInTask extends AsyncTask<Void,Void,String>{
 //        private boolean rem_Flag = checkBoxRemPSW.isChecked();
 //        private boolean autoSignIn_Flag = checkBoxAutoSignIn.isChecked();
@@ -181,6 +241,7 @@ public class SignInActivity extends Activity{
                         CurrentUser user = CurrentUser.getOnlyUser();
                         user.setUsername(Sname);
                         user.setUserId(json);
+                        user.setCurrentState(currentState);
                         SharedPreferences.Editor editor = sp.edit();
 
                         editor.putBoolean(REM_PSW, true);
@@ -207,63 +268,8 @@ public class SignInActivity extends Activity{
             }
         }
     }
-    private static class MyHandler extends Handler{
-        private WeakReference<Context> reference;
-        MyHandler(Context context){
-            reference = new WeakReference<>(context);
-        }
-        @Override
-        public void handleMessage(Message msg) {
-            SignInActivity activity = (SignInActivity) reference.get();
-            if(activity != null){
-                switch (msg.what){
-                    case 0x34:
-                        Toast.makeText(activity, "用户名密码错误", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x35:
-                        Toast.makeText(activity, "其他错误", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x36:
-                        Intent i;
-                        if(Sname.equals("yh")){
-                            i = new Intent(activity, DeviceScanActivity.class);
-                        }else{
-                            i = new Intent(activity, TasksActivity.class);
-                        }
-                        activity.startActivity(i);
-                        activity.finish();
-                        break;
-                    case 0x38:
-                        Toast.makeText(activity, "无法连接服务器", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-    private void checkLogin() {
-        // Reset errors.
-        userTextInput.setErrorEnabled(false);
-        passwordTextInput.setErrorEnabled(false);
-
-        Sname = TextUsername.getText().toString();
-        Spassword = TextPassword.getText().toString();
-
-        if (TextUtils.isEmpty(Sname)) {
-            userTextInput.setError("请输入用户名");
-            return;
-        }
-        if (TextUtils.isEmpty(Spassword)) {
-            passwordTextInput.setError("请输入密码");
-            return;
-        }
-        new SignInTask().execute();
-    }
 
     private class ForgetPasswordListener implements View.OnClickListener {
-
         @Override
         public void onClick(View v) {
             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SignInActivity.this);

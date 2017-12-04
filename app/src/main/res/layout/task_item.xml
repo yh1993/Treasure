@@ -1,72 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <RelativeLayout
-        android:layout_marginTop="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/dataRelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:id="@+id/dataRelativeLayout"
-        android:background="@color/white">
+        android:layout_marginTop="8dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
         <ImageView
+            android:id="@+id/imgView"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_centerVertical="true"
-            android:id="@+id/imgView"
-            android:layout_alignParentLeft="true"
-            android:src="@mipmap/ic_launcher"
             android:contentDescription="@string/img_launcher"
+            android:src="@drawable/task_pic"
             />
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/imgView"
+            android:layout_marginStart="8dp"
+            android:layout_weight="3"
             android:orientation="vertical"
-            android:layout_marginLeft="8dp"
             >
             <TextView
                 android:id="@+id/money"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:typeface ="sans"
-                android:textSize ="16sp"
-                android:textColor="#000000"
                 android:text="任务金额:200"
+                android:textColor="#000000"
+                android:textSize ="16sp"
+                android:typeface ="sans"
                 />
             <TextView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:typeface ="sans"
-                android:textSize ="16sp"
-                android:textColor="#000000"
                 android:text="开始时间:???"
+                android:textColor="#000000"
+                android:textSize ="16sp"
+                android:typeface ="sans"
                 />
 
         </LinearLayout>
 
         <Button
             android:id="@+id/join"
-            android:typeface ="sans"
-            android:textSize ="16sp"
-            android:textColor="#000000"
-            android:text="未参与"
-            android:layout_toLeftOf="@id/btn_share"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="#00000000"
-            android:layout_centerVertical="true"
+            android:text="未参与"
+            android:textColor="#000000"
+            android:textSize ="16sp"
+            android:typeface ="sans"
+
             />
         <ImageButton
             android:id="@+id/btn_share"
-            android:layout_alignParentEnd="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_share_black_24dp"/>
-    </RelativeLayout>
+            android:src="@drawable/ic_share_black_24dp"
+            />
+    </LinearLayout>
 </LinearLayout>

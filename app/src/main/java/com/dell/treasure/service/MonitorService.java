@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.dao.DaoSession;
@@ -24,16 +25,18 @@ import static com.dell.treasure.support.ToolUtil.dateToString;
  * 判断扫描服务是否运行，以参与任务后，开启的扫描时长作为用户参与任务时长
  */
 public class MonitorService extends Service {
-    private TaskDao taskDao;
-    private Task task;
+    private static final String SERVICE_NAME = "com.dell.treasure.service.ScannerService";
     public static boolean isCheck = false;
     public static boolean isRunning = false;
-    private static final String SERVICE_NAME = "com.dell.treasure.service.ScannerService";
+    private TaskDao taskDao;
+    private Task task;
+    private int times;
 
     @Override
     public void onCreate() {
         // TODO Auto-generated method stub
         super.onCreate();
+        times = 0;
         Logger.d("MonitorService onCreate");
         isRunning = true;
         MyApp myApp = MyApp.getInstance();
@@ -60,10 +63,18 @@ public class MonitorService extends Service {
                         task.setEndTime(dateToString(new Date()));
                         taskDao.update(task);
                         Logger.d(" "+task.getEndTime());
-                        Logger.d("任务标志 "+task.getFlag());
+                        Logger.d("任务标志 "+task.getTaskId()+" "+task.getBeginTime()+" "+task.getFlag());
                     }
                     try {
+                        times++;
+                        if(times == 3){
+                            times = 0;
+                            Log.d("result", "if: times "+times);
+                            Intent posIntent = new Intent(MonitorService.this, UploadService.class);
+                            startService(posIntent);
+                        }
                         Thread.sleep(60 * 1000);
+
                     } catch (InterruptedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -42,23 +43,25 @@ import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    public CurrentUser user;
     private SharedPreferences sp;
     private TextView bindName;
     private TextView tagBle;
     private TextView title;
     private ImageView back;    //返回
-
     private TableLayout tableLayout; //求助内容布局
     private EditText payment;
     private EditText time_lost;
     private EditText lost_place;
-
+    private EditText needNum_edit;
+    private TableLayout tableLayout1;  //结束任务布局
+    private EditText taskId_edit;
+    private EditText num_edit;
     private Button save;
     private Button help;
     private int helpFlag = 1;//求助、提交切换
-
+    private int overFlag = 1; //结束/提交切换
     private ProgressDialog pDialog;
-
     //上报信息
     private String lost_time;
     private String address;
@@ -66,8 +69,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double lon;
     private String pay;
     private String ble_id;
-
-    public CurrentUser user;
+    private String needNum;
+    //结束任务
+    private String taskId;
+    private String numK;
     private String username;
 
     private LocationService locationService;
@@ -97,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageView loc_lost = (ImageView) findViewById(R.id.choose_lost_Place);
         loc_lost.setOnClickListener(this);
         lost_place = (EditText)findViewById(R.id.lostPlace);
+        needNum_edit = (EditText) findViewById(R.id.needNum);
 
         save = (Button)findViewById(R.id.save_button);
         save.setOnClickListener(this);
@@ -118,6 +124,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tagBle = (TextView) findViewById(R.id.address);
         bindName.setText(sp.getString(Ble_record.BIND_NAME, null));
         tagBle.setText(sp.getString(Ble_record.TAG_BLE,null));
+
+        tableLayout1 = (TableLayout)findViewById(R.id.TableLayout2);
+        taskId_edit = (EditText)findViewById(R.id.taskId);
+        num_edit = (EditText) findViewById(R.id.number);
     }
 
     @Override
@@ -147,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.over_game:
+                gameOver();
                 break;
             case R.id.get_price:
                 break;
@@ -169,6 +180,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendHelp();
                 break;
 
+        }
+    }
+
+    private void gameOver() {
+        tableLayout1.setVisibility(View.VISIBLE);
+        if(overFlag==1){
+            overFlag = 0;
+            game_over.setText("提 交");
+        }else {
+            overFlag = 1;
+            taskId = taskId_edit.getText().toString();
+            numK = num_edit.getText().toString();
+
+            if (!TextUtils.isEmpty(taskId_edit.getText()) && !TextUtils.isEmpty(num_edit.getText())) {
+                new TaskOver().execute();
+            }
         }
     }
 
@@ -197,25 +224,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .show();
     }
 
-    public class MyLocationListener implements BDLocationListener{
-        @Override
-        public void onReceiveLocation(BDLocation bdLocation) {
-            if(bdLocation == null){
-                return;
-            }else{
-                lat = bdLocation.getLatitude();
-                lon = bdLocation.getLongitude();
-                Log.d("result",lat+" "+lon );
-                String address2 = bdLocation.getAddrStr();
-                String address1 = bdLocation.getAddress().toString();
-
-                address = bdLocation.getLocationDescribe();//位置语义化结果
-                Log.d("result",address2+" "+address1 +" "+address);
-                lost_place.setText(address);
-            }
-            locationService.stop();
-        }
-    }
     private void getTime(){
         View view = View.inflate(getApplicationContext(), R.layout.time_picker, null);
         final TimePicker timePicker = (TimePicker)view.findViewById(R.id.time_picker);
@@ -278,8 +286,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
             String s = formatter.format(new Date());
             lost_time = s + " " + time_lost.getText().toString();
+            needNum = needNum_edit.getText().toString();
 
-            if (!TextUtils.isEmpty(time_lost.getText()) && !TextUtils.isEmpty(lost_place.getText())) {
+            if (!TextUtils.isEmpty(time_lost.getText()) && !TextUtils.isEmpty(lost_place.getText())
+                    && !TextUtils.isEmpty(needNum_edit.getText())) {
                 SubmitTask asyncTask = new SubmitTask();
                 asyncTask.execute();
             } else {
@@ -298,6 +308,74 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 })
                         .show();
             }
+        }
+    }
+
+    private static class MyHandler extends Handler {
+        private WeakReference<Context> reference;
+        MyHandler(Context context){
+            reference = new WeakReference<>(context);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            MainActivity activity = (MainActivity) reference.get();
+            if(activity != null){
+                switch (msg.what) {
+                    case 0x33:
+                        Toast.makeText(activity, "积分不足", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x34:
+                        Toast.makeText(activity, "求助成功", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x36:
+                        Toast.makeText(activity, "该任务已经存在", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x37:
+                        Toast.makeText(activity, "任务发布失败", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x38:
+                        Toast.makeText(activity, "无法连接服务器", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x39:
+                        Toast.makeText(activity, "解绑成功", Toast.LENGTH_SHORT).show();
+                        activity.finish();
+                        break;
+                    case 0x3A:
+                        Toast.makeText(activity, "解绑失败", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x3B:
+                        Toast.makeText(activity, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x3C:
+                        Toast.makeText(activity, "任务结束失败", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 0x3D:
+                        Toast.makeText(activity, "任务结束", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    public class MyLocationListener implements BDLocationListener{
+        @Override
+        public void onReceiveLocation(BDLocation bdLocation) {
+            if(bdLocation == null){
+                return;
+            }else{
+                lat = bdLocation.getLatitude();
+                lon = bdLocation.getLongitude();
+                Log.d("result",lat+" "+lon );
+                String address2 = bdLocation.getAddrStr();
+                String address1 = bdLocation.getAddress().toString();
+
+                address = bdLocation.getLocationDescribe();//位置语义化结果
+                Log.d("result",address2+" "+address1 +" "+address);
+                lost_place.setText(address);
+            }
+            locationService.stop();
         }
     }
 
@@ -366,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected String doInBackground(String... args) {
             String json = null;
             try {
-                json = NetUtil.ReleaseTask(username,ble_id,address,String.valueOf(lon),String.valueOf(lat),lost_time,pay);
+                json = NetUtil.ReleaseTask(username,ble_id,address,String.valueOf(lon),String.valueOf(lat),lost_time,pay,needNum);
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();
             }
@@ -411,46 +489,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-    private static class MyHandler extends Handler {
-        private WeakReference<Context> reference;
-        MyHandler(Context context){
-            reference = new WeakReference<>(context);
-        }
+
+    private class TaskOver extends AsyncTask<String, Integer, String> {
+
         @Override
-        public void handleMessage(Message msg) {
-            MainActivity activity = (MainActivity) reference.get();
-            if(activity != null){
-                switch (msg.what) {
-                    case 0x33:
-                        Toast.makeText(activity, "积分不足", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x34:
-                        Toast.makeText(activity, "求助成功", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x36:
-                        Toast.makeText(activity, "该任务已经存在", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x37:
-                        Toast.makeText(activity, "任务发布失败", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x38:
-                        Toast.makeText(activity, "无法连接服务器", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x39:
-                        Toast.makeText(activity, "解绑成功", Toast.LENGTH_SHORT).show();
-                        activity.finish();
-                        break;
-                    case 0x3A:
-                        Toast.makeText(activity, "解绑失败", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 0x3B:
-                        Toast.makeText(activity, msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
-                }
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("任务结束上报中..");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(true);
+            pDialog.show();
+        }
+
+        protected String doInBackground(String... args) {
+            String json = null;
+            try {
+                json = NetUtil.getWinner(taskId,numK);
+            } catch (SoapFault | NullPointerException soapFault) {
+                soapFault.printStackTrace();
+            }
+            Message msg = myHandler.obtainMessage();
+            if (json == null){
+                msg.what = 0x3C;
+            }else {
+                msg.what = 0x3D;
+            }
+            myHandler.sendMessage(msg);
+            return null;
+        }
+
+        protected void onPostExecute(String file_url) {
+            // dismiss the dialog once done
+            if(pDialog != null) {
+                pDialog.dismiss();
+                pDialog = null;
             }
         }
+
     }
 
 }

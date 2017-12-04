@@ -26,10 +26,8 @@ import com.orhanobut.logger.Logger;
 public class TraceService extends Service {
     private static final String TAG = "TraceService";
     public static boolean running = false;
-
+    static boolean isTraceStart = false;
     public MyApp myApp;
-    private String userId;
-
     //entity标识
     String entityName = null;
     // 轨迹服务客户端
@@ -42,8 +40,7 @@ public class TraceService extends Service {
     OnStartTraceListener startTraceListener = null;
     // 停止轨迹服务监听器
     OnStopTraceListener stopTraceListener = null;
-
-    static boolean isTraceStart = false;
+    private String userId;
 
     @Override
     public void onCreate() {
@@ -82,7 +79,7 @@ public class TraceService extends Service {
 
     private void startTrace() {
         //开启轨迹服务
-        Log.d(TAG,"开启"+userId+"轨迹");
+        Log.d("result",TAG+" 开启"+userId+"轨迹");
         client.startTrace(trace, startTraceListener);
     }
 

@@ -5,6 +5,7 @@ import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -15,11 +16,17 @@ import com.baidu.trace.Trace;
 import com.dell.treasure.dao.DaoMaster;
 import com.dell.treasure.dao.DaoSession;
 import com.dell.treasure.service.LocationService;
+import com.dell.treasure.share.ShareableActivity;
 import com.mob.MobApplication;
+import com.mob.moblink.AbstractRestoreSceneListener;
+import com.mob.moblink.MobLink;
 
 import org.greenrobot.greendao.database.Database;
 
+import java.util.HashMap;
+
 import cn.jpush.android.api.JPushInterface;
+import cn.sharesdk.framework.ShareSDK;
 
 /**
  * 全局信息
@@ -27,11 +34,11 @@ import cn.jpush.android.api.JPushInterface;
 public class MyApp extends MobApplication {
 
     public static final String TAG = "Myapp";
+    private static MyApp instances;
     public LocationService locationService;
     public BluetoothAdapter mBluetoothAdapter;
     private DaoSession daoSession = null;
     private Context mContext = null;
-    private static MyApp instances;
     private int appCount = 0;
     private CurrentUser user;
     //轨迹服务客户端
@@ -45,6 +52,10 @@ public class MyApp extends MobApplication {
 
     //轨迹服务类型（0 : 不建立socket长连接， 1 : 建立socket长连接但不上传位置数据，2 : 建立socket长连接并上传位置数据）
     private int traceType = 2;
+
+    public static MyApp getInstance(){
+        return instances;
+    }
 
     @Override
     public void onCreate() {
@@ -88,6 +99,32 @@ public class MyApp extends MobApplication {
         });
 
         mContext = getApplicationContext();
+
+        // 设置场景还原监听器
+        MobLink.setRestoreSceneListener(new AbstractRestoreSceneListener() {
+
+            @Override
+            public void onReturnSceneData(Activity activity, final HashMap<String, Object> result) {
+                Log.d(TAG, "onReturnSceneData(), activity" + activity);
+                // 处理场景还原数据， 更新画面
+                if (activity instanceof ShareableActivity) {
+                    final ShareableActivity sa = (ShareableActivity) activity;
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sa.onReturnSceneData(result);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public boolean onReturnSceneIntent(String url, Intent intent) {
+                Log.d(TAG, "onReturnSceneIntent, url" + url);
+                return super.onReturnSceneIntent(url, intent);
+            }
+        });
+
         locationService = new LocationService(mContext);
         SDKInitializer.initialize(mContext);
 
@@ -102,10 +139,6 @@ public class MyApp extends MobApplication {
         mBluetoothAdapter = bluetoothManager.getAdapter();
         user = CurrentUser.getOnlyUser();
         JPushInterface.init(this);
-    }
-
-    public static MyApp getInstance(){
-        return instances;
     }
 
     /**

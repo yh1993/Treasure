@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -23,9 +24,11 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dell.treasure.R;
 import com.dell.treasure.SignInActivity;
+import com.dell.treasure.rank.RegisterActivity;
 import com.dell.treasure.service.NetService;
 import com.dell.treasure.service.UserInfo;
 import com.dell.treasure.share.InviteActivity;
@@ -34,33 +37,33 @@ import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.ActivityUtils;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.MyApp;
+import com.dell.treasure.support.NetUtil;
+
+import org.ksoap2.SoapFault;
 
 
 public class TasksActivity extends AppCompatActivity {
+    public static final String TAG = "TasksActivity";
+    private static final String CURRENT_FILTERING_KEY = "CURRENT_FILTERING_KEY";
     private MyApp myApp;
     private String username;
-
     private DrawerLayout mDrawerLayout;
-
     private TextView points;
     private TextView money;
     private TextView user;
-
     private UserInfoReceiver userInfoReceiver;
     private LocalBroadcastManager broadcastManager;
     private NavigationView navigationView;
-
     private Fragment currentFragment;
     private int currentIndex;
     private Boolean isFirst;
     private SharedPreferences sp;
-
-    private static final String CURRENT_FILTERING_KEY = "CURRENT_FILTERING_KEY";
     private TasksPresenter mTasksPresenter;
     private TasksLocalDataSource mtasksLocalDataSource;
     private TasksRepository mtasksRepository;
 
     private CurrentUser userInfo;
+    private String currentState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +80,7 @@ public class TasksActivity extends AppCompatActivity {
 //      toolbar
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         // 标题的文字需在setSupportActionBar之前，不然会无效
-        mToolbar.setTitle("Treasure");
+        mToolbar.setTitle("校园寻宝");
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
@@ -96,6 +99,14 @@ public class TasksActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.dell.treasure.RECEIVER_UserInfo");
         broadcastManager.registerReceiver(userInfoReceiver, intentFilter);
+
+        currentState = userInfo.getCurrentState();
+        if(currentState.equals("000")||currentState.equals("005")){
+            new isSignTask().execute();
+        }
+
+        //判断是否第一次启动
+        sp = getSharedPreferences(username, Context.MODE_PRIVATE);
 
     }
 
@@ -136,8 +147,8 @@ public class TasksActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //判断是否第一次启动
-        sp = getSharedPreferences(username, Context.MODE_PRIVATE);
+//        调试设置,记得注销
+        userInfo.setCurrentState("003");
         isFirst = sp.getBoolean("FIRST", true);
         String points1 = sp.getString("points", "");
         String money1 = sp.getString("money", "");
@@ -151,6 +162,30 @@ public class TasksActivity extends AppCompatActivity {
         isFirstSign();
         if(!userInfo.getTasKind().equals("0")){
             startService(new Intent(TasksActivity.this,NetService.class));
+        }
+        judgeCurrentState();
+    }
+
+    private void judgeCurrentState() {
+        Intent intent = new Intent();
+        currentState = userInfo.getCurrentState();
+        switch (currentState){
+            case "001":
+                //招募结束
+                intent.setClass(TasksActivity.this,RegisterActivity.class);
+                startActivity(intent);
+                break;
+            case "002":
+                //任务等待
+            case "004":
+                //任务结束
+            case "003":
+                //任务进行中
+                mTasksPresenter.setFiltering(TasksFilterType.ACTIVE_TASKS);
+                mTasksPresenter.loadTasks(false);
+                break;
+            default:
+                break;
         }
     }
 
@@ -185,37 +220,8 @@ public class TasksActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new NavigationItemSelected());
     }
 
-    private class NavigationItemSelected implements NavigationView.OnNavigationItemSelectedListener{
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()){
-                case R.id.navigation_item_yes:
-//                    helpType = 0;
-                    currentIndex = 0;
-                    item.setChecked(true);
-//                    currentFragment = new FristFragment();
-//                    switchContent(currentFragment);
-                    break;
-                case R.id.navigation_item_query:
-//                    helpType = 1;
-                    firstSign();
-                    break;
-                case R.id.navigation_item_no:
-//                    helpType = 2;
-                    exit();
-                    break;
-                case R.id.navigation_item_share:
-//                    helpType = 2;
-                    Intent intent = new Intent(TasksActivity.this, InviteActivity.class);
-                    startActivity(intent);
-                    item.setCheckable(false);
-                    break;
-                default:
-                    break;
-            }
-            mDrawerLayout.closeDrawers();
-            return true;
-        }
+    private void completedTasks() {
+        //调转到已完成任务清单
     }
 
     public void switchContent(Fragment fragment) {
@@ -279,6 +285,58 @@ public class TasksActivity extends AppCompatActivity {
                 .show();
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {  //获取 back键
+            exit();
+        }
+        return false;
+    }
+
+    private class NavigationItemSelected implements NavigationView.OnNavigationItemSelectedListener{
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Intent intent = new Intent();
+            switch (item.getItemId()){
+                case R.id.navigation_item_yes:
+                    currentIndex = 0;
+                    item.setChecked(true);
+//                    currentFragment = new FristFragment();
+//                    switchContent(currentFragment);
+                    break;
+                case R.id.navigation_item_query:
+                    firstSign();
+                    break;
+                case R.id.navigation_item_no:
+                    exit();
+                    break;
+//                case R.id.navigation_item_register:
+//                    if(currentState.equals("000")){
+//                        Toast.makeText(TasksActivity.this,"注册阶段结束，方可查看",Toast.LENGTH_LONG).show();
+//                    }else {
+//                        intent.setClass(TasksActivity.this, RegisterActivity.class);
+//                        startActivity(intent);
+//                        item.setCheckable(false);
+//                    }
+//                    break;
+                case R.id.navigation_item_task:
+                    mTasksPresenter.setFiltering(TasksFilterType.COMPLETED_TASKS);
+                    mTasksPresenter.loadTasks(false);
+                    completedTasks();
+                    break;
+//                case R.id.navigation_item_share:
+//                    intent.setClass(TasksActivity.this, InviteActivity.class);
+//                    startActivity(intent);
+//                    item.setCheckable(false);
+//                    break;
+                default:
+                    break;
+            }
+            mDrawerLayout.closeDrawers();
+            return true;
+        }
+    }
+
     public class UserInfoReceiver extends BroadcastReceiver {
 
         @Override
@@ -290,11 +348,33 @@ public class TasksActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {  //获取 back键
-            exit();
+    private class isSignTask extends AsyncTask<Void, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
         }
-        return false;
+
+        @Override
+        protected String doInBackground(Void... params) {
+            Boolean isSign = false;
+            try {
+                isSign = NetUtil.isSignPeriod();
+            } catch (SoapFault soapFault) {
+                soapFault.printStackTrace();
+            }
+            if(!isSign){
+                currentState = "001";
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(currentState.equals("000")){
+                //招募阶段
+                Intent intent = new Intent(TasksActivity.this, InviteActivity.class);
+                startActivity(intent);
+            }
+        }
     }
 }

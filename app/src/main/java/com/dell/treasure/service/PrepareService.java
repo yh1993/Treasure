@@ -67,6 +67,7 @@ public class PrepareService extends Service {
             PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             sendDefaultNotice(context,"任务","收到任务，点击进入程序查看详情。",R.mipmap.ic_launcher, pi);
         }
+        stopSelf();
     }
 
     @Nullable

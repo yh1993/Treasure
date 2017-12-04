@@ -1,7 +1,9 @@
 package com.dell.treasure.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 
 import com.baidu.trace.OnTrackListener;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.dao.DaoSession;
 import com.dell.treasure.dao.Task;
@@ -36,6 +39,10 @@ import static com.dell.treasure.support.ToolUtil.stringToDate;
  */
 
 public class AlarmService extends Service {
+    /**
+     * Track监听器
+     */
+    protected static OnTrackListener trackListener = null;
     private MyApp myApp;
     private CurrentUser user;
     private String userId;
@@ -45,156 +52,10 @@ public class AlarmService extends Service {
     private String endTime;
     private double timeLong;
     private String way;
-
     private TaskDao taskDao;
     private Query<Task> taskQuery;
     private List<Task> tasks;
     private Task task;
-
-    private long ownTime;
-    private long sysTime;
-    /**
-     * Track监听器
-     */
-    protected static OnTrackListener trackListener = null;
-    @Override
-    public void onCreate() {
-        super.onCreate();
-//        if(TraceService.running){
-//            Intent i = new Intent(this,TraceService.class);
-//            stopService(i);
-//        }
-        myApp = (MyApp) getApplication();
-        user = CurrentUser.getOnlyUser();
-        user.setTarget_ble("");
-        user.setLastId("");
-        ScannerService.isFirst = 0;
-        user.setBeginTime("");
-        user.setEndTime("");
-
-        // 初始化OnTrackListener
-        initOnTrackListener();
-
-        DaoSession daoSession = myApp.getDaoSession();
-        taskDao = daoSession.getTaskDao();
-        taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.eq(1)).build();
-        tasks = taskQuery.list();
-        Logger.d(" "+tasks.size());
-        if(tasks.size() > 0) {
-            task = tasks.get(0);
-            userId = user.getUserId();
-            lastId = task.getLastId();
-            taskId = task.getTaskId();
-            beginTime = task.getBeginTime();
-            endTime = task.getEndTime();
-            if(Objects.equals(lastId, "0")){
-                way = "1";
-            }else{
-                way = "2";
-            }
-            new GetTimeTask().execute();
-        }else {
-            Toast.makeText(AlarmService.this,"任务已经结算，请勿重复提交。",Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    private class GetTimeTask extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        protected String doInBackground(String... args) {
-            String json = null;
-            try {
-                json = NetUtil.GetFinish(taskId);
-            } catch (SoapFault | NullPointerException soapFault) {
-                soapFault.printStackTrace();
-            }
-            if (json == null){
-                Message msg = msgHandler.obtainMessage();
-                msg.what = 0x38;
-                msgHandler.sendMessage(msg);
-            }else if (json.equals("0")){
-                Logger.d("任务没有完成");
-                ownTime = stringToDate(endTime).getTime();
-            } else{
-                Logger.d("endTime: "+endTime+" , sysTime: "+json);
-                ownTime = stringToDate(endTime).getTime();
-                sysTime = stringToDate(json).getTime();
-                if(ownTime > sysTime){
-                    ownTime = sysTime;
-                }
-            }
-            long start = stringToDate(beginTime).getTime();
-            queryDistance(start,ownTime);
-            timeLong = (ownTime- start) / 1000.0 / 60.0;
-            return null;
-        }
-
-        protected void onPostExecute(String file_url) {
-
-        }
-
-    }
-
-    private class UserTask extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        protected String doInBackground(String... args) {
-            DecimalFormat df = new DecimalFormat("#.0");
-            String json = null;
-            try {
-                json = NetUtil.RecordParti(userId, taskId, df.format(timeLong), user.getDistance(), way, lastId);
-                Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+beginTime+" "+ endTime+" "+user.getDistance()+" "+json);
-            } catch (SoapFault | NullPointerException soapFault) {
-                soapFault.printStackTrace();
-            }
-            if (json == null){
-                Message msg = msgHandler.obtainMessage();
-                msg.what = 0x38;
-                msgHandler.sendMessage(msg);
-            }else {
-                switch (json) {
-                    case "t": {
-                        Message msg = msgHandler.obtainMessage();
-                        msg.what = 0x35;
-                        msgHandler.sendMessage(msg);
-                        break;
-                    }
-                    case "f": {
-                        Message msg = msgHandler.obtainMessage();
-                        msg.what = 0x36;
-                        msgHandler.sendMessage(msg);
-                        break;
-                    }
-                    case "n": {
-                        Message msg = msgHandler.obtainMessage();
-                        msg.what = 0x37;
-                        msgHandler.sendMessage(msg);
-                        break;
-                    }
-                }
-            }
-            return null;
-        }
-
-        protected void onPostExecute(String file_url) {
-        }
-
-    }
-
     private final Handler msgHandler = new Handler()
     {
         public void handleMessage(Message msg)
@@ -219,6 +80,73 @@ public class AlarmService extends Service {
             stopSelf();
         }
     };
+    private long ownTime;
+    private long sysTime;
+    private String isFound;
+    private SharedPreferences sp;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+//        if(TraceService.running){
+//            Intent i = new Intent(this,TraceService.class);
+//            stopService(i);
+//        }
+        myApp = (MyApp) getApplication();
+        user = CurrentUser.getOnlyUser();
+        user.setTarget_ble("");
+        user.setLastId("0");
+        ScannerService.isFirst = 0;
+        user.setBeginTime("");
+        user.setEndTime("");
+
+        // 初始化OnTrackListener
+        initOnTrackListener();
+
+        DaoSession daoSession = myApp.getDaoSession();
+        taskDao = daoSession.getTaskDao();
+        task = Task.getInstance();
+        taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.eq(1)).build();
+        tasks = taskQuery.list();
+        Logger.d(" "+tasks.size());
+        sp = AlarmService.this.getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
+        if(sp.getBoolean("isFound",false)){
+            isFound = "1";
+        }else {
+            isFound = "0";
+        }
+        if(tasks.size() > 0) {
+            task.setTask(tasks.get(0));
+            userId = user.getUserId();
+            lastId = task.getLastId();
+
+            taskId = task.getTaskId();
+            beginTime = task.getBeginTime();
+            Logger.d("6、lastID beginTime "+lastId+" "+beginTime);
+            endTime = task.getEndTime();
+            if(Objects.equals(lastId, "0")){
+                way = "1";
+            }else{
+                way = "2";
+            }
+            Logger.d("6、上报参与信息 "+userId+" "+taskId+" "+lastId+" "+way+" "+beginTime+" "+ endTime);
+            ownTime = stringToDate(endTime).getTime();
+            long start = stringToDate(beginTime).getTime();
+            Logger.d("6、上报参与信息 "+beginTime + stringToDate(beginTime));
+            queryDistance(start,ownTime);
+            timeLong = (ownTime- start) / 1000.0 / 60.0;
+//            new GetTimeTask().execute();
+        }else {
+            Toast.makeText(AlarmService.this,"任务已经结算，请勿重复提交。",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
     // 查询里程
     public void queryDistance(long startTime,long endTime) {
 
@@ -278,5 +206,102 @@ public class AlarmService extends Service {
             }
 
         };
+    }
+
+    private class GetTimeTask extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        protected String doInBackground(String... args) {
+            String json = null;
+            try {
+                json = NetUtil.GetFinish(taskId);
+            } catch (SoapFault | NullPointerException soapFault) {
+                soapFault.printStackTrace();
+            }
+            if (json == null){
+                Message msg = msgHandler.obtainMessage();
+                msg.what = 0x38;
+                msgHandler.sendMessage(msg);
+            }else if (json.equals("0")){
+                Logger.d("任务没有完成");
+                ownTime = stringToDate(endTime).getTime();
+            } else{
+                Logger.d("endTime: "+endTime+" , sysTime: "+json);
+                ownTime = stringToDate(endTime).getTime();
+                sysTime = stringToDate(json).getTime();
+                if(ownTime > sysTime){
+                    ownTime = sysTime;
+                }
+            }
+            long start = stringToDate(beginTime).getTime();
+            queryDistance(start,ownTime);
+            timeLong = (ownTime- start) / 1000.0 / 60.0;
+            Logger.d("5、上报参与信息 "+userId+" "+taskId+" "+lastId+" "+way+" "+beginTime+" "+ endTime+" "+user.getDistance()+" "+json);
+            return null;
+        }
+
+        protected void onPostExecute(String file_url) {
+
+        }
+
+    }
+
+    private class UserTask extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        protected String doInBackground(String... args) {
+            DecimalFormat df = new DecimalFormat("#.0");
+            String json = null;
+            try {
+                json = NetUtil.RecordParti(userId, taskId, df.format(timeLong), user.getDistance(), way, lastId,isFound);
+                Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+beginTime+" "+ endTime+" "+user.getDistance()+" "+json);
+            } catch (SoapFault | NullPointerException soapFault) {
+                soapFault.printStackTrace();
+            }
+            if (json == null){
+                Message msg = msgHandler.obtainMessage();
+                msg.what = 0x38;
+                msgHandler.sendMessage(msg);
+            }else {
+                switch (json) {
+                    case "t": {
+                        Message msg = msgHandler.obtainMessage();
+                        msg.what = 0x35;
+                        msgHandler.sendMessage(msg);
+                        break;
+                    }
+                    case "f": {
+                        Message msg = msgHandler.obtainMessage();
+                        msg.what = 0x36;
+                        msgHandler.sendMessage(msg);
+                        break;
+                    }
+                    case "n": {
+                        Message msg = msgHandler.obtainMessage();
+                        msg.what = 0x37;
+                        msgHandler.sendMessage(msg);
+                        break;
+                    }
+                }
+            }
+            return null;
+        }
+
+        protected void onPostExecute(String file_url) {
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("isFound", false);
+            editor.putString("level", "0");
+            editor.putString("num","0");
+            editor.apply();
+        }
+
     }
 }

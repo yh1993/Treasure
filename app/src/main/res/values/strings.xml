@@ -19,8 +19,9 @@
 
     <string name="img_launcher">图片</string>
     <string name="already_scanning">扫描已经开始.</string>
-    <string name="notice">"        非常感谢您参与这个活动，本次活动为校园寻宝游戏。需要打开app，当接近宝物时，会有提示，出现提示，即为找到。
-        奖励会在活动结束后统一发放。本次活动的奖励主要考量参与活动的时长，行进路程，扩散消息的人数三个要素"</string>
+    <string name="notice">"        欢迎参与校园寻宝游戏，我们将不定时发布寻宝任务（其实就是寻找一个在校园里任意活动的某位同学携带的手机），
+        并通过app推送任务信息，您需要打开手机蓝牙和GPS参与寻宝（只要您的手机曾经发现过那位同学的蓝牙，就算找到，会在任务结束时告知您结果），
+        同时可以将寻宝任务通过微信分享给您的朋友。最终我们会根据每个小伙伴的参与情况计算贡献值，然后根据贡献值按照某种机制分配奖金。"</string>
 
 
     <string name="task_marked_complete">Task marked complete</string>
@@ -61,18 +62,21 @@
     </string-array>
 
     <string name="share">分享</string>
-    <string name="share_text">你有一份邀请红包待领取。。。</string>
+    <string name="show_share_titel">MobLink帮你实现网页APP相互跳转</string>
+    <string name="share_text">你的好友邀请你加入游戏，一起领取奖励。。。</string>
     <string name="invite_user">邀请用户</string>
-    <string name="invite_user_title">你的ID是&lt;font color=\'#4e8bed\'&gt;%s&lt;/font&gt;,邀请用户各奖励10元红包</string>
+    <string name="invite_user_title">你的ID是&lt;font color=\'#4e8bed\'&gt;%s&lt;/font&gt;,邀请好友注册户将获取红包奖励</string>
     <string name="change_id">换一个ID</string>
     <string name="get_reward">呼朋唤友 拿红包</string>
-    <string name="invite_user_text">邀请好友注册，双方各奖励10元红包</string>
-    <string name="invite_user_content">邀请好友注册，双方各奖励&lt;font color=\'#4e8bed\'&gt;10元&lt;/font&gt;红包。</string>
+    <string name="invite_user_text">邀请好友注册，获取红包奖励</string>
+    <string name="invite_user_content">邀请好友注册，奖励&lt;font color=\'#4e8bed\'&gt;1元&lt;/font&gt;红包。</string>
+    <string name="invite_user_content1">邀请好友注册，一起分享红包。</string>
+    <string name="task_detail_invite">扩散任务，邀请更多的人参与，会获得更多的奖励。</string>
     <string name="share_to_friends">快速分享给好友</string>
     <string name="more_detail_rules">更多详细规则</string>
     <string name="invite_register_success">你好，%s \n 注册成功</string>
-    <string name="invite_register_person">邀请人ID：%s \n 双方各获得10元优惠券</string>
-    <string name="invite_share_titel">邀请你注册得10元红包</string>
+    <string name="invite_register_person">邀请人ID：%s \n 获得1元红包</string>
+    <string name="invite_share_titel">邀请</string>
 
     <string name="path">路径path</string>
     <string name="source">来源source</string>

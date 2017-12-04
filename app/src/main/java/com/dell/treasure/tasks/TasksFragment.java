@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.PopupMenu;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,45 +44,70 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dell.treasure.R;
 import com.dell.treasure.dao.Task;
 import com.dell.treasure.dao.TaskDao;
+import com.dell.treasure.rank.TaskRankActivity;
 import com.dell.treasure.service.AdvertiserService;
 import com.dell.treasure.service.ScannerService;
+import com.dell.treasure.support.ActivityUtils;
 import com.dell.treasure.support.CommonUtils;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.MyApp;
+import com.mob.moblink.ActionListener;
+import com.mob.moblink.MobLink;
 
 import org.greenrobot.greendao.query.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cn.sharesdk.onekeyshare.OnekeyShare;
 
 
 public class TasksFragment extends Fragment implements TasksContract.View {
-
-    private TasksContract.Presenter mPresenter;
-
-    private TasksAdapter mListAdapter;
-
-    private View mNoTasksView;
-
-    private ImageView mNoTaskIcon;
-
-    private TextView mNoTaskMainView;
-
-    private LinearLayout mTasksView;
-
-    private TextView mFilteringLabelView;
-
+    public static final String TAG = "TasksFragment";
+    public final static String PAR_KEY = "treasure.task";
     private static CurrentUser user;
+    private TasksContract.Presenter mPresenter;
+    /**
+     * Listener for clicks on tasks in the ListView.
+     */
+    TaskItemListener mItemListener = new TaskItemListener() {
+        @Override
+        public void onTaskClick(Task taskFlag) {
+            mPresenter.openTaskDetails(taskFlag);
+        }
 
+//        @Override
+//        public void onCompleteTaskClick(Task completedTask) {
+//            mPresenter.completeTask(completedTask);
+//        }
+//
+//        @Override
+//        public void onActivateTaskClick(Task activatedTask) {
+//            mPresenter.activateTask(activatedTask);
+//        }
+    };
+    private TasksAdapter mListAdapter;
+    private View mNoTasksView;
+    private ImageView mNoTaskIcon;
+    private TextView mNoTaskMainView;
+    private LinearLayout mTasksView;
+    private TextView mFilteringLabelView;
     private Task task;
     private TaskDao taskDao;
     private Context context;
+    private String mobID;
+    private String userId;
+    private String taskId;
+    private String strategy_text;
+    private String money_text;
+    private SharedPreferences sp;
 
     public TasksFragment() {
 
@@ -94,9 +121,11 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         user = CurrentUser.getOnlyUser();
+        userId = user.getUserId();
         context = getActivity();
         mListAdapter = new TasksAdapter(new ArrayList<Task>(0), mItemListener);
 //        mListAdapter = new TasksAdapter(new ArrayList<Task>(0));
+        sp = getActivity().getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
         initData();
     }
 
@@ -104,22 +133,29 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     public void onResume() {
         super.onResume();
         mPresenter.start();
+        isReceiveTaskFromUser();
+    }
+
+    private void isReceiveTaskFromUser() {
     }
 
     private void isRestartService() {
         Intent startScanService = new Intent(context, ScannerService.class);
         switch (task.getFlag()){
             case -3:
-                user.setNetConn(false);
+//                user.setNetConn(false);
+                user.setJoin(false);
                 context.startService(startScanService);
                 break;
             case 0:
             case -1:
-                user.setNetConn(true);
+                user.setJoin(true);
+//                user.setNetConn(true);
                 restartDialog(task.getFlag());
                 break;
             case -2:
-                user.setNetConn(true);
+                user.setJoin(false);
+//                user.setNetConn(true);
                 break;
             default:
                 break;
@@ -133,12 +169,13 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         List<Task> tasks = taskQuery.list();
         if (tasks.size() > 0) {
             task.setTask(tasks.get(0));
-            Log.d("result",task.getTaskId());
+            Log.d("result",TAG +"taskID: "+task.getTaskId());
             if(!ScannerService.running){
                 isRestartService();
             }
         }
     }
+
 //提示
     private void restartDialog(final int flag) {
         new AlertDialog.Builder(context)
@@ -165,15 +202,15 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                 .show();
     }
 
-    @Override
-    public void setPresenter(@NonNull TasksContract.Presenter presenter) {
-        mPresenter = presenter;
-    }
-
 //    @Override
 //    public void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        mPresenter.result(requestCode, resultCode);
 //    }
+
+    @Override
+    public void setPresenter(@NonNull TasksContract.Presenter presenter) {
+        mPresenter = presenter;
+    }
 
     @Nullable
     @Override
@@ -232,9 +269,9 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_clear:
-                mPresenter.clearCompletedTasks();
-                break;
+//            case R.id.menu_clear:
+//                mPresenter.clearCompletedTasks();
+//                break;
             case R.id.menu_filter:
                 showFilteringPopUpMenu();
                 break;
@@ -275,26 +312,6 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 
         popup.show();
     }
-
-    /**
-     * Listener for clicks on tasks in the ListView.
-     */
-    TaskItemListener mItemListener = new TaskItemListener() {
-        @Override
-        public void onTaskClick(int taskFlag) {
-            mPresenter.openTaskDetails(taskFlag);
-        }
-
-//        @Override
-//        public void onCompleteTaskClick(Task completedTask) {
-//            mPresenter.completeTask(completedTask);
-//        }
-//
-//        @Override
-//        public void onActivateTaskClick(Task activatedTask) {
-//            mPresenter.activateTask(activatedTask);
-//        }
-    };
 
     @Override
     public void setLoadingIndicator(final boolean active) {
@@ -382,11 +399,26 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 //    }
 //
     @Override
-    public void showTaskDetailsUi(int taskFlag) {
+    public void showTaskDetailsUi(Task taskFlag) {
         // in it's own Activity, since it makes more sense that way and it gives us the flexibility
         // to show some Intent stubbing.
-        if(taskFlag == -2) {
-            Intent intent = new Intent(getContext(), TaskDetails.class);
+        int flag = taskFlag.getFlag();
+        Intent intent = new Intent();
+        if(flag >= 2) {
+            intent.setClass(getContext(), TaskRankActivity.class);
+            intent.putExtra("TaskId",taskFlag.getTaskId());
+            startActivity(intent);
+        }else if(flag >=-1 && flag <2){
+//            intent.setClass(getContext(), TaskRankActivity.class);
+//            intent.putExtra("TaskId",taskFlag.getTaskId());
+//            startActivity(intent);
+            intent.setClass(getContext(), ActiveTackDetails.class);
+            Bundle extra = new Bundle();
+            extra.putParcelable(PAR_KEY,taskFlag);
+            intent.putExtras(extra);
+            startActivity(intent);
+        }else if(flag <- 1){
+            intent.setClass(getContext(), TaskDetails.class);
             startActivity(intent);
         }
 
@@ -419,6 +451,92 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     @Override
     public boolean isActive() {
         return isAdded();
+    }
+
+    private void showShare() {
+        OnekeyShare oks = new OnekeyShare();
+        //关闭sso授权
+        oks.disableSSOWhenAuthorize();
+
+        // 分享时Notification的图标和文字  2.5.9以后的版本不     调用此方法
+        //oks.setNotification(R.drawable.ic_launcher, getString(R.string.app_name));
+        // title标题，印象笔记、邮箱、信息、微信、人人网和QQ空间使用
+        oks.setTitle(getString(R.string.share));
+        // titleUrl是标题的网络链接，仅在人人网和QQ空间使用
+//        oks.setTitleUrl("http://sharesdk.cn");
+        oks.setUrl("myApp://myweb.com/openApp");
+        // text是分享文本，所有平台都需要这个字段
+        oks.setText("邀请您参加寻宝任务，一起分享奖励");
+        // imagePath是图片的本地路径，Linked-In以外的平台都支持此参数
+        oks.setImagePath(CommonUtils.copyImgToSD(getActivity(), R.drawable.demo_share_invite , "invite"));//确保SDcard下面存在此张图片
+        // url仅在微信（包括好友和朋友圈）中使用
+//        oks.setUrl("http://sharesdk.cn");
+        oks.setUrl("myApp://myweb.com/openApp");
+        // comment是我对这条分享的评论，仅在人人网和QQ空间使用
+        oks.setComment("我是测试评论文本");
+        // site是分享此内容的网站名称，仅在QQ空间使用
+        oks.setSite(getString(R.string.app_name));
+        // siteUrl是分享此内容的网站地址，仅在QQ空间使用
+        oks.setSiteUrl("http://sharesdk.cn");
+
+        // 启动分享GUI
+        oks.show(getActivity());
+    }
+
+    private void share() {
+        String shareUrl = "mlink://treasure.com"+ CommonUtils.MAIN_PATH_ARR;
+        if (!TextUtils.isEmpty(userId)) {
+            shareUrl += "?userId=" + userId;
+        }
+        if (!TextUtils.isEmpty(taskId)) {
+            shareUrl += "&taskId=" + taskId;
+        }
+        String title = getString(R.string.invite_share_titel);
+        String text = getString(R.string.share_text);
+        String imgPath = CommonUtils.copyImgToSD(getActivity(), R.mipmap.ic_launcher , "invite");
+        CommonUtils.showShare(getActivity(), title, text, shareUrl, imgPath);
+    }
+
+    private void setDefault(){
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        String source = "";
+        String key1 = "userId";
+        String key2 = "taskId";
+        String value1 = user.getUserId();
+        String value2 = task.getTaskId();
+        params.put(key1, value1);
+        params.put(key2, value2);
+
+
+        MobLink.getMobID(params, CommonUtils.MAIN_PATH_ARR, source, new ActionListener() {
+            public void onResult(HashMap<String, Object> params) {
+                if (params != null && params.containsKey("mobID")) {
+                    mobID = String.valueOf(params.get("mobID"));
+                }
+            }
+
+            public void onError(Throwable t) {
+                if (t != null) {
+                    Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        String shareUrl = CommonUtils.SHARE_URL + CommonUtils.MAIN_PATH_ARR;
+        if (!TextUtils.isEmpty(mobID)) {
+            shareUrl += "?mobid=" + mobID;
+        }
+        String title = getString(R.string.show_share_titel);
+        String text = getString(R.string.share_text);
+        String imgPath = CommonUtils.copyImgToSD(getActivity(), R.drawable.demo_share_moblink , "moblink");
+        CommonUtils.showShare(getActivity(), title, text, shareUrl, imgPath);
+    }
+    public interface TaskItemListener {
+
+        void onTaskClick(Task taskFlag);
+
+//        void onCompleteTaskClick(Task completedTask);
+//
+//        void onActivateTaskClick(Task activatedTask);
     }
 
     private  class TasksAdapter extends BaseAdapter {
@@ -461,12 +579,26 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            ViewHolder holder;
+            final Task item = mTasks.get(i);
+            final ViewHolder holder;
             if (view == null) {
                 holder = new ViewHolder();
                 LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-                view = inflater.inflate(R.layout.task_item, viewGroup, false);
-                holder.money = (TextView) view.findViewById(R.id.money);
+                if(Integer.parseInt(item.getTaskId()) < 1){
+                    view = inflater.inflate(R.layout.task_item_active, viewGroup, false);
+                    holder.strategy = (TextView) view.findViewById(R.id.strategy_text);
+                    holder.money = (TextView) view.findViewById(R.id.money);
+                    strategy_text  = sp.getString("strategy", null);
+                    money_text = sp.getString("money",null);
+                    if(strategy_text != null){
+                        holder.strategy.setText(strategy_text);
+                    }
+                    if(money_text != null){
+                        holder.money.setText(money_text);
+                    }
+                }else {
+                    view = inflater.inflate(R.layout.task_item, viewGroup, false);
+                }
                 holder.time = (TextView) view.findViewById(R.id.time);
                 holder.pic = (ImageView) view.findViewById(R.id.imgView);
                 holder.share = (ImageButton) view.findViewById(R.id.btn_share);
@@ -477,7 +609,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                 holder = (ViewHolder) view.getTag();
             }
 
-            holder.time.setText("开始时间:"+ user.getStartTime());
+            holder.time.setText("开始时间:"+ getItem(i).getBeginTime());
             final Task task = getItem(i);
             switch (task.getFlag()){
                 case -2:
@@ -493,72 +625,42 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                     holder.join.setText("未提交");
                     break;
                 case 2:
+//                    暂时注释
                     holder.join.setText("结束");
+                    holder.share.setVisibility(View.GONE);
                     break;
                 case 3:
                     holder.join.setText("任务过期");
+                    holder.share.setVisibility(View.GONE);
                     break;
             }
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showShare();
+//                    showShare();
+//                    setDefault();
+                    taskId = item.getTaskId();
+                    share();
                 }
             });
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mItemListener.onTaskClick(task.getFlag());
+                    mItemListener.onTaskClick(task);
                 }
             });
 
             return view;
         }
          class ViewHolder{
-            ImageView pic;
-            TextView money;
-            TextView time;
-            Button join;
-            ImageButton share;
+             ImageView pic;
+             TextView money;
+             TextView time;
+             TextView strategy;
+             Button join;
+             ImageButton share;
         }
-    }
-
-    public interface TaskItemListener {
-
-        void onTaskClick(int taskFlag);
-
-//        void onCompleteTaskClick(Task completedTask);
-//
-//        void onActivateTaskClick(Task activatedTask);
-    }
-
-    private void showShare() {
-        OnekeyShare oks = new OnekeyShare();
-        //关闭sso授权
-        oks.disableSSOWhenAuthorize();
-
-        // 分享时Notification的图标和文字  2.5.9以后的版本不     调用此方法
-        //oks.setNotification(R.drawable.ic_launcher, getString(R.string.app_name));
-        // title标题，印象笔记、邮箱、信息、微信、人人网和QQ空间使用
-        oks.setTitle(getString(R.string.share));
-        // titleUrl是标题的网络链接，仅在人人网和QQ空间使用
-        oks.setTitleUrl("http://sharesdk.cn");
-        // text是分享文本，所有平台都需要这个字段
-        oks.setText("邀请您参加寻宝任务，一起分享奖励");
-        // imagePath是图片的本地路径，Linked-In以外的平台都支持此参数
-        oks.setImagePath(CommonUtils.copyImgToSD(getActivity(), R.drawable.demo_share_invite , "invite"));//确保SDcard下面存在此张图片
-        // url仅在微信（包括好友和朋友圈）中使用
-        oks.setUrl("http://sharesdk.cn");
-        // comment是我对这条分享的评论，仅在人人网和QQ空间使用
-        oks.setComment("我是测试评论文本");
-        // site是分享此内容的网站名称，仅在QQ空间使用
-        oks.setSite(getString(R.string.app_name));
-        // siteUrl是分享此内容的网站地址，仅在QQ空间使用
-        oks.setSiteUrl("http://sharesdk.cn");
-
-        // 启动分享GUI
-        oks.show(getActivity());
     }
 
 }

@@ -7,6 +7,22 @@ android {
     buildToolsVersion '25.0.0'
     aaptOptions.cruncherEnabled = false
     aaptOptions.useNewCruncher = false
+
+    signingConfigs {
+        debug {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file('C:/Users/yh/.android/debug.keystore')
+            storePassword 'android'
+        }
+        release {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file('C:/Users/yh/.android/debug.keystore')
+            storePassword 'android'
+        }
+    }
+
     defaultConfig {
         applicationId "com.dell.treasure"
         minSdkVersion 21
@@ -28,8 +44,13 @@ android {
                 JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
         ]
     }
+
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -59,6 +80,7 @@ dependencies {
     compile 'com.orhanobut:logger:1.13'
     compile 'cn.jiguang.sdk:jpush:3.0.0'
     compile 'cn.jiguang.sdk:jcore:1.0.0'
+    compile 'com.google.code.gson:gson:2.8.2'
     testCompile 'junit:junit:4.12'
     compile files('libs/ksoap2-android-assembly-3.3.0-jar-with-dependencies.jar')
     compile files('libs/httpmime-4.2.5.jar')

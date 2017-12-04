@@ -1,6 +1,5 @@
 package com.dell.treasure.support;
 
-
 import android.util.Log;
 
 import org.ksoap2.SoapEnvelope;
@@ -10,6 +9,8 @@ import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
+import java.util.logging.Logger;
+
 
 /**
  * Created by hp on 2016/3/17 0017.
@@ -18,7 +19,7 @@ public class NetUtil {
     //命名空间
     private final static String nameSpace = "http://jxn.com/";
     // EndPoint
-    private final static String allPoint = "http://222.128.13.159:9696/find/all?wsdl";
+    private final static String allPoint = "http://39.106.142.138:9696/find/all/?wsdl";
 
     private final static int TimeOut = 12000;
 
@@ -210,7 +211,7 @@ public class NetUtil {
     }
 
     public static String ReleaseTask(String username,String MacId,String location,
-        String lon,String lat,String losetime,String money) throws SoapFault {
+        String lon,String lat,String losetime,String money,String needUserNum) throws SoapFault {
         String response;
 
         String methodName = "ReleaseTask";
@@ -225,6 +226,7 @@ public class NetUtil {
         rpc.addProperty("lat", lat);
         rpc.addProperty("losetime", losetime);
         rpc.addProperty("money", money);
+        rpc.addProperty("needUserNum", needUserNum);
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
 
@@ -386,11 +388,11 @@ public class NetUtil {
     }
 
     public static String RecordParti(String userId,String taskId,String timeLongth,String distance,
-                                      String way,String fromId) throws SoapFault {
+                                      String way,String fromId,String isFound) throws SoapFault {
         String response;
 
-        String methodName = "tasks_act";
-        String soapAction = "http://jxn.com/tasks_act";
+        String methodName = "recordParti";
+        String soapAction = "http://jxn.com/recordParti";
 
         SoapObject rpc = new SoapObject(nameSpace, methodName);
 
@@ -400,6 +402,7 @@ public class NetUtil {
         rpc.addProperty("distance",distance);
         rpc.addProperty("way", way);
         rpc.addProperty("fromId", fromId);
+        rpc.addProperty("isFound", isFound);
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
 
@@ -444,13 +447,14 @@ public class NetUtil {
             e.printStackTrace();
 
         }
-        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+         SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
 //        SoapObject object = (SoapObject) envelope.getResponse();
         response = object.toString();
         return response;
     }
 
     public static String isReciveMeg(String username) throws SoapFault {
+        //判断用户是否需要联网
         String response;
 
         String methodName = "isReciveMeg";
@@ -479,4 +483,258 @@ public class NetUtil {
         response = object.toString();
         return response;
     }
+
+    public static boolean isSignPeriod() throws SoapFault {
+        //判断是否为注册阶段
+        boolean response;
+        String methodName = "isSignPeriod";
+        String soapAction = "http://jxn.com/isSignPeriod";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString().equals("true");
+        Log.d("result","isSign: "+ object.toString()+" "+response);
+        return response;
+    }
+
+    public static String levelAndNum(String taskId,String fromuserId) throws SoapFault {
+        //判断用户参与时是第几个参与进来的并且是第几层
+        String response;
+
+        String methodName = "levelAndNum";
+        String soapAction = "http://jxn.com/levelAndNum";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        rpc.addProperty("taskId", taskId);
+//        rpc.addProperty("userId", userId);
+        rpc.addProperty("fromuserId", fromuserId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        Log.d("result", "levelAndNum: "+response);
+        return response;
+    }
+
+    public static String getTaskReward(String userId, String taskId) throws SoapFault {
+        //获取奖励金额
+        String response;
+
+        String methodName = "getTaskReward";
+        String soapAction = "http://jxn.com/getTaskReward";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        rpc.addProperty("userId", userId);
+        rpc.addProperty("taskId", taskId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        return response;
+    }
+
+    public static String signBoard() throws SoapFault {
+        //注册排行榜
+        String response;
+
+        String methodName = "signBoard";
+        String soapAction = "http://jxn.com/signBoard";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        Log.d("result", "signBoard: "+ response);
+        return response;
+    }
+
+    public static String TaskPartInfo(String taskId) throws SoapFault {
+        //任务排行榜
+
+        String response;
+
+        String methodName = "TaskPartInfo";
+        String soapAction = "http://jxn.com/TaskPartInfo";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        rpc.addProperty("taskId", taskId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        Log.d("result", "TaskPartInfo: "+ response);
+        return response;
+    }
+
+    public static String getWinner(String taskId,String k) throws SoapFault {
+        //结束任务
+
+        String response;
+
+        String methodName = "getWinner";
+        String soapAction = "http://jxn.com/getWinner";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        rpc.addProperty("taskId", taskId);
+        rpc.addProperty("k", k);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        return response;
+    }
+    public static String getInfoDetail() throws SoapFault {
+        //结束任务
+
+        String response;
+
+        String methodName = "getInfoDetail";
+        String soapAction = "http://jxn.com/getInfoDetail";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        Log.d("result","getInfoDetail: "+response);
+        return response;
+    }
+    public static String getTaskInfo(String taskId) throws SoapFault {
+        //结束任务
+
+        String response;
+
+        String methodName = "getTaskInfo";
+        String soapAction = "http://jxn.com/getTaskInfo";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        rpc.addProperty("taskId", taskId);
+
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        Log.d("result","getTaskInfo: "+response);
+        return response;
+    }
+
 }

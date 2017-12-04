@@ -12,7 +12,6 @@ import android.view.WindowManager;
 
 import com.dell.treasure.publisher.DeviceScanActivity;
 import com.dell.treasure.support.CurrentUser;
-import com.dell.treasure.support.MyApp;
 import com.dell.treasure.tasks.TasksActivity;
 import com.orhanobut.logger.Logger;
 
@@ -27,6 +26,7 @@ public class SplashActivity extends Activity{
     private CurrentUser user;
     private String username = null;
     private String userid = null;
+    private String currentState = "000";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,7 @@ public class SplashActivity extends Activity{
         sp = getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
         username = sp.getString(SignInActivity.USERNAME, null);
         userid = sp.getString(SignInActivity.USERID,null);
+        currentState = sp.getString(SignInActivity.CURRENT_STATE,"000");
 
         int SPLASH_DISPLAY_LENGTH = 1000;
         new Handler().postDelayed(new Runnable() {
@@ -49,6 +50,8 @@ public class SplashActivity extends Activity{
                     user = CurrentUser.getOnlyUser();
                     user.setUsername(username);
                     user.setUserId(userid);
+                    user.setCurrentState(currentState);
+                    Log.d("result",TAG +" user id name state: "+userid+" "+username+" "+currentState);
 
                     if(getIntent().getStringExtra("tasKind") != null){
                         user.setTasKind(getIntent().getStringExtra("tasKind"));

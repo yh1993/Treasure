@@ -1,9 +1,11 @@
 package com.dell.treasure.share;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dell.treasure.R;
 
@@ -22,6 +24,13 @@ public class InviteDetailActivity extends ShareableActivity {
 		tvInviteTitle = (TextView) findViewById(R.id.tv_invite_title);
 		tvInviteText = (TextView) findViewById(R.id.tv_invite_text);
 		tvInviteTitle.setText(String.format(getString(R.string.invite_register_success), ""));
+		Intent i = getIntent();
+		if (Intent.ACTION_VIEW.equals(i.getAction())){
+			Uri uri = i.getData();
+			if (uri != null){
+				Toast.makeText(this,uri.getQueryParameter("userId"),Toast.LENGTH_LONG).show();
+			}
+		}
 	}
 
 	@Override

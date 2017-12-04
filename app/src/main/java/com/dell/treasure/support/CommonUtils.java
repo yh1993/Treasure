@@ -27,6 +27,10 @@ public class CommonUtils {
 	public static final boolean DEBUGGABLE = MobLink.DEBUGGABLE;
 
 	public static final String SHARE_URL;
+	public static final String MAIN_PATH_ARR = "/demo/a";
+	public static final String INVITE_PATH = "/params/invite";
+	public static final String INVITE_SOURCE = "MobLinkDemo-Invite";
+
 	static {
 		if (DEBUGGABLE) {
 			SHARE_URL = "http://192.168.180.86:8000";
@@ -34,9 +38,6 @@ public class CommonUtils {
 			SHARE_URL = "http://f.moblink.mob.com";
 		}
 	}
-
-	public static final String INVITE_PATH = "/params/invite";
-	public static final String INVITE_SOURCE = "MobLinkDemo-Invite";
 
 	/**
 	 * 创建一个自定义dialog，场景还原的参数展示dialog

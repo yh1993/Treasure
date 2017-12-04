@@ -2,7 +2,6 @@ package com.dell.treasure.support;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.dell.treasure.dao.DaoSession;
@@ -38,11 +37,14 @@ public class StartTask {
         myApp = MyApp.getInstance();
         task = Task.getInstance();
 
-        initTaskDB();
+
     }
 
     public static void startTask(Context context) {
         user.setBeginTime(dateToString(new Date()));
+        initTaskDB();
+        Log.d("beginTime", "beginTime: 1 "+new Date()+ " " + user.getBeginTime());
+        Log.d("result", "startTask: beginTime "+new Date()+" "+user.getBeginTime());
 
         serviceTrace = new Intent(context,TraceService.class);
 
@@ -81,7 +83,7 @@ public class StartTask {
         task.setLastId(user.getLastId());
         task.setBeginTime(user.getBeginTime());
 //        task.setFlag(0);
-        Log.d("result",task.getId() + task.getLastId());
+        Log.d("result",task.getId() +task.getTaskId()+ task.getLastId() + task.getBeginTime());
         taskDao.update(task);
     }
 
@@ -92,7 +94,7 @@ public class StartTask {
             context.stopService(serviceIntent);
         }
         if(serviceTrace != null){
-            context.startService(serviceTrace);
+            context.stopService(serviceTrace);
         }
 
         //这里记录结束时间，怎么记录待定
@@ -100,7 +102,7 @@ public class StartTask {
             user.setEndTime(dateToString(new Date()));
         }
         task.setEndTime(user.getEndTime());
-        task.setFlag(1);
+        task.setFlag(2);
         taskDao.update(task);
 
         Logger.d("endtime: "+task.getEndTime()+" 任务标志 "+task.getFlag());

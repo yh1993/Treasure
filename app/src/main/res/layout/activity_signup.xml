@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bkg">
+    android:background="@mipmap/bkg"
+    android:orientation="vertical">
 
     <TableLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:orientation="vertical"
         android:padding="40dp"
         android:stretchColumns="1">
 
@@ -25,7 +25,7 @@
                     android:layout_height="wrap_content"
                     android:ems="12"
                     android:hint="支付宝账号"
-                    android:inputType="textPersonName"/>
+                    android:inputType="text"/>
                 <!--<requestFocus/>-->
             </android.support.design.widget.TextInputLayout>
         </TableRow>
@@ -39,10 +39,10 @@
                 android:id="@+id/editTextSignUpUser"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="20dp"
                 android:ems="12"
                 android:hint="用户名"
-                android:inputType="textPersonName"/>
+                android:inputType="textPersonName"
+                android:paddingTop="20dp"/>
             <!--<requestFocus/>-->
             </android.support.design.widget.TextInputLayout>
         </TableRow>
@@ -54,15 +54,32 @@
                 android:layout_height="wrap_content">
             <EditText
                 android:id="@+id/editTextSignUpPaw"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:layout_width="match_parent"
-                android:paddingTop="20dp"
                 android:ems="12"
                 android:hint="密码"
-                android:inputType="textPassword"/>
+                android:inputType="textPassword"
+                android:paddingTop="20dp"/>
             </android.support.design.widget.TextInputLayout>
         </TableRow>
+        <!--<TableRow-->
+            <!--android:gravity="center_horizontal">-->
+            <!--<android.support.design.widget.TextInputLayout-->
+                <!--android:id="@+id/invitationTextInput"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
+                <!--<EditText-->
+                    <!--android:id="@+id/editTextInvitation"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="10dp"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:paddingTop="20dp"-->
+                    <!--android:ems="12"-->
+                    <!--android:hint="邀请码（非必需）"-->
+                    <!--android:inputType="number"/>-->
+            <!--</android.support.design.widget.TextInputLayout>-->
+        <!--</TableRow>-->
     </TableLayout>
 
     <TableLayout
@@ -72,21 +89,21 @@
         android:stretchColumns="0">
         <TableRow>
             <Button
-                android:layout_width="wrap_content"
                 android:id="@+id/buttonSignUp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/white_button"
-                android:text="注 册"
-                android:gravity="center_horizontal"/>
+                android:gravity="center_horizontal"
+                android:text="注 册"/>
 
         </TableRow>
 
         <TableRow>
             <Button
-                android:layout_marginTop="20dp"
-                android:layout_width="wrap_content"
                 android:id="@+id/buttonSignUpCancel"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/white_button"
                 android:text="取 消" />
         </TableRow>

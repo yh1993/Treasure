@@ -11,12 +11,14 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 
 import com.dell.treasure.dao.Task;
 import com.dell.treasure.support.Adaptive_Inquiry;
 import com.dell.treasure.support.AppSurvice;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.StartTask;
 import com.orhanobut.logger.Logger;
 
@@ -36,15 +38,14 @@ import java.util.List;
 public class ScannerService extends Service {
     public static boolean running = false;
     public static int isFirst = 0;      //0 首次上报  1 不需要再次上报  2需要再次上报
-
-    private DeviceLiveThread deviceLiveThread;  //循环扫描线程
-
     public CurrentUser user;
+    private DeviceLiveThread deviceLiveThread;  //循环扫描线程
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
 
     private String bleId;
     private Task task;
+    private Boolean isJoin;
 
     @Override
     public void onCreate() {
@@ -52,6 +53,7 @@ public class ScannerService extends Service {
         user = CurrentUser.getOnlyUser();
         bleId = user.getTarget_ble();
         task = Task.getInstance();
+        isJoin = user.isJoin();
         initialize();
         if(task.getFlag() == 0 || task.getFlag() == -1){
             StartTask.init();
@@ -125,6 +127,13 @@ public class ScannerService extends Service {
         return builder.build();
     }
 
+    private void startDeviceLiving(){
+        if(deviceLiveThread==null){
+            deviceLiveThread=new DeviceLiveThread();
+            deviceLiveThread.start();
+        }
+    }
+
     private class SampleScanCallback extends ScanCallback {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
@@ -135,7 +144,8 @@ public class ScannerService extends Service {
         public  void onScanResult(int callbackType, final ScanResult result) {
             String address = result.getDevice().getAddress();
 //            获取广播数据包
-            if(!user.isNetConn()){
+//            if(!user.isNetConn()){
+            if(!user.isJoin()){
                 try {
                     ScanRecord scanRecord = result.getScanRecord();
                     final byte[] bytes = scanRecord.getManufacturerSpecificData(1);
@@ -144,7 +154,7 @@ public class ScannerService extends Service {
                         String lastId = Arrays.toString(bytes);
                         Logger.d("从上线接收到消息 ：" + lastId);
                         user.setLastId(lastId);
-                        user.setNetConn(true);
+//                        user.setNetConn(true);
 
                         AppSurvice.isSurvive(getApplicationContext());
                         stopSelf();
@@ -163,6 +173,9 @@ public class ScannerService extends Service {
             } else {
                 if (bleId != null && !bleId.isEmpty() && address.equals(bleId)){ //&& AdvertiserService.running) {
                     if (isFirst == 0 || isFirst == 2) {
+                        SharedPreferences.Editor editor = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE).edit();
+                        editor.putBoolean("isFound", true);
+                        editor.apply();
                         isFirst = 1;
                         final Intent positonIntent = new Intent(ScannerService.this, Location.class);
                         Logger.d("3、找到了 bleid " + bleId);
@@ -210,13 +223,6 @@ public class ScannerService extends Service {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    private void startDeviceLiving(){
-        if(deviceLiveThread==null){
-            deviceLiveThread=new DeviceLiveThread();
-            deviceLiveThread.start();
         }
     }
 }

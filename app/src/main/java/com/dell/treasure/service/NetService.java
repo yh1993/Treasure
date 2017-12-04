@@ -29,10 +29,10 @@ import static com.dell.treasure.support.NotificationHelper.sendDefaultNotice;
  */
 
 public class NetService extends Service {
-    private CurrentUser user;
-    private boolean isNet;
     TaskDao taskDao;
     Task task;
+    private CurrentUser user;
+    private boolean isNet;
     private MyApp myApp;
 
     @Override
@@ -53,16 +53,17 @@ public class NetService extends Service {
     }
 
     private void start(){
-        user.setNetConn(isNet);
+//        user.setNetConn(isNet);
         insertTask();
-        if(!isNet) {
-            startScan();
-        }else {
+//        if(!isNet) {
+//            startScan();
+//        }else {
             Intent taskIntent = new Intent(getApplicationContext(), TaskDetails.class);
             user.setTasKind("1");
             PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, taskIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             sendDefaultNotice(getApplicationContext(), "任务", "收到任务，点击进入程序查看详情。", R.mipmap.ic_launcher, pi);
-        }
+//        }
+        stopSelf();
     }
 
     private void startScan(){  //服务器扩散
@@ -82,8 +83,9 @@ public class NetService extends Service {
         List<Task> tasks = taskQuery.list();
         if (tasks.size() > 0) {
             task.setTask(tasks.get(0));
+            Log.d("result","NetService "+ task.getId() + " " + task.getFlag());
         }
-        Log.d("result","NetService "+ task.getId() + " " + task.getFlag());
+
     }
 
     private class NetWorkTask extends AsyncTask<String, Integer, String> {
@@ -99,7 +101,7 @@ public class NetService extends Service {
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();
             }
-            Log.d("result",json);
+            Log.d("result","isNet "+json);
             if (json == null){
                 isNet = false;
             }else {

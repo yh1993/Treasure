@@ -21,8 +21,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!--允许应用读取低级别的系统日志文件 -->
     <uses-permission android:name="android.permission.READ_LOGS" />
-
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
     <!-- Optional for location -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 用于开启 debug 版本的应用在6.0 系统上 层叠窗口权限 -->
@@ -59,6 +57,19 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".SplashActivity2"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="treasure.com" android:path="/demo/a" android:scheme="mlink"/>
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".SignInActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -85,43 +96,75 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".tasks.TasksActivity"
+            android:name=".rank.RegisterActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTask">
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".rank.TaskRankActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".tasks.TasksActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
-        <activity
+        <activit
             android:name=".tasks.TaskDetails"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTop">
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activit>
+
+        <activity
+            android:name=".tasks.ActiveTackDetails"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
         <activity
+            android:name=".share.AppLinksActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="com.mob.moblink.demo" android:scheme="http"/>
+                <data android:host="com.mob.moblink.demo" android:scheme="https"/>
+
+                <!-- <data android:scheme="http" android:host="7pb6.ulml.mob.com" />
+                <data android:scheme="https" android:host="7pb6.ulml.mob.com" /> -->
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".share.InviteActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false"
             android:launchMode="standard"
-            android:name=".share.InviteActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name=".share.InviteDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
-            android:name=".share.InviteDetailActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="com.mob.moblink.demo" android:path="/params/invite" android:scheme="mlink"/>
+                <data android:host="treasure.com" android:path="/params/invite" android:scheme="mlink"/>
             </intent-filter>
         </activity>
 
         <activity
             android:name="com.mob.tools.MobUIShell"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="stateHidden|adjustResize" >
 
             <intent-filter>
@@ -135,10 +178,11 @@
 
         <activity
             android:name="cn.sharesdk.demo.wxapi.WXEntryActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
 
         <receiver
             android:name=".support.JpushReceiver"
@@ -154,7 +198,8 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.baidu.location.f"
+        <service
+            android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote">
             <intent-filter>
@@ -165,7 +210,8 @@
         <service
             android:name="com.baidu.trace.LBSTraceService"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true"
+            android:process=":remote">
         </service>
         <service android:name=".service.ScannerService"/>
         <service android:name=".service.AdvertiserService"/>
@@ -176,6 +222,8 @@
         <service android:name=".service.MonitorService"/>
         <service android:name=".service.PrepareService"/>
         <service android:name=".service.NetService"/>
+        <service android:name=".service.UploadService"/>
+
 
     </application>
 

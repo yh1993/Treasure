@@ -43,22 +43,22 @@
         android:layout_height="1dp"
         android:background="#d9d9d9" />
     
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:gravity="center_vertical"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:background="#fff7dd">
-        <TextView
-            android:id="@+id/tv_user_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/invite_user_title"
-            android:textColor="#a4a4a4"
-            android:textSize="13dp" />
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="40dp"-->
+        <!--android:gravity="center_vertical"-->
+        <!--android:paddingLeft="15dp"-->
+        <!--android:paddingRight="15dp"-->
+        <!--android:background="#fff7dd">-->
+        <!--<TextView-->
+            <!--android:id="@+id/tv_user_id"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/invite_user_title"-->
+            <!--android:textColor="#a4a4a4"-->
+            <!--android:textSize="13dp" />-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
     <ImageView
         android:id="@+id/iv_invite"
@@ -66,14 +66,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="34dp"
-        android:src="@drawable/demo_invite_reward" />
+        android:src="@drawable/hongbao2" />
 
     <TextView
         android:id="@+id/tv_invite_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="43dp"
         android:layout_gravity="center"
+        android:layout_marginTop="43dp"
         android:text="@string/get_reward"
         android:textColor="#000000"
         android:textSize="18dp" />
@@ -90,18 +90,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/invite_user_content"
             android:lineSpacingExtra="25dp"
+            android:text="@string/invite_user_content1"
             android:textColor="#a4a4a4"
             android:textSize="15dp" />
         <Button
             android:id="@+id/btn_share"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginTop="45dp"
             android:layout_marginBottom="10dp"
+            android:layout_marginTop="45dp"
+            android:background="@drawable/demo_btn_corner"
             android:text="@string/share_to_friends"
-            android:textColor="#ffffff"
-            android:background="@drawable/demo_btn_corner"/>
+            android:textColor="#ffffff"/>
     </LinearLayout>
 </LinearLayout>
