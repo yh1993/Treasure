@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/dataRelativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+        <ImageView
+            android:id="@+id/imgView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/img_launcher"
+            android:src="@drawable/task_pic"
+            />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="3"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:id="@+id/money"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="任务金额:200"
+                android:textColor="#000000"
+                android:textSize ="16sp"
+                android:typeface ="sans"
+                />
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开始时间:???"
+                android:textColor="#000000"
+                android:textSize ="16sp"
+                android:typeface ="sans"
+                />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/join"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:text="未参与"
+            android:textColor="#000000"
+            android:textSize ="16sp"
+            android:typeface ="sans"
+
+            />
+        <ImageButton
+            android:id="@+id/btn_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_share_black_24dp"
+            />
+    </LinearLayout>
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="280dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="@drawable/gonggaoban"
+        android:scrollbarStyle="outsideOverlay">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:gravity="center_horizontal"
+                android:text="任务说明"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/strategy_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:gravity="start"
+                android:text=" 欢迎参与校园寻宝游戏，我们将不定时发布寻宝任务（其实就是寻找一个在校园里任意活动的某位同学携带的手机），并通过app推送任务信息，您需要打开手机蓝牙和GPS参与寻宝（只要您的手机曾经发现过那位同学的蓝牙，就算找到，会在任务结束时告知您结果），同时可以将寻宝任务通过微信分享给您的朋友。最终我们会根据每个小伙伴的参与情况计算贡献值，然后根据贡献值按照某种机制分配奖金。
+"
+                android:textAlignment="textStart"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
