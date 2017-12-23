@@ -643,7 +643,6 @@ public class NetUtil {
 
     public static String getWinner(String taskId,String k) throws SoapFault {
         //结束任务
-
         String response;
 
         String methodName = "getWinner";
@@ -674,8 +673,6 @@ public class NetUtil {
         return response;
     }
     public static String getInfoDetail() throws SoapFault {
-        //结束任务
-
         String response;
 
         String methodName = "getInfoDetail";
@@ -703,8 +700,40 @@ public class NetUtil {
         Log.d("result","getInfoDetail: "+response);
         return response;
     }
+    public static String getRecordTimeDis(String taskId,String userId) throws SoapFault {
+        String response;
+
+        String methodName = "getRecordTimeDis";
+        String soapAction = "http://jxn.com/getRecordTimeDis";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+
+        rpc.addProperty("taskId", taskId);
+        rpc.addProperty("userId", userId);
+
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+//        SoapObject object = (SoapObject) envelope.getResponse();
+        response = object.toString();
+        Log.d("result","getRecordTimeDis: "+response);
+        return response;
+    }
+
     public static String getTaskInfo(String taskId) throws SoapFault {
-        //结束任务
 
         String response;
 

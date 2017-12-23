@@ -2,6 +2,7 @@ package com.dell.treasure.rank;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dell.treasure.R;
+import com.dell.treasure.service.UserInfo;
 import com.dell.treasure.share.BaseActivity;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.NetUtil;
@@ -60,6 +62,7 @@ public class TaskRankActivity extends BaseActivity {
 
         taskId = getIntent().getStringExtra("TaskId");
         new getTaskRankTask().execute();
+        startService(new Intent(this, UserInfo.class));
     }
 
     class getTaskRankTask extends AsyncTask<Void ,Void, Void> {

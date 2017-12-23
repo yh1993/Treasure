@@ -80,8 +80,11 @@ public class StartTask {
                 task.setTask(tasks.get(0));
             }
         }
-        task.setLastId(user.getLastId());
-        task.setBeginTime(user.getBeginTime());
+        if(task.getLastId().isEmpty()) {
+            task.setLastId(user.getLastId());
+        }
+
+        task.setBeginTime(dateToString(new Date()));
 //        task.setFlag(0);
         Log.d("result",task.getId() +task.getTaskId()+ task.getLastId() + task.getBeginTime());
         taskDao.update(task);

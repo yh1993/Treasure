@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -51,7 +50,6 @@ public class SplashActivity extends Activity{
                     user.setUsername(username);
                     user.setUserId(userid);
                     user.setCurrentState(currentState);
-                    Log.d("result",TAG +" user id name state: "+userid+" "+username+" "+currentState);
 
                     if(getIntent().getStringExtra("tasKind") != null){
                         user.setTasKind(getIntent().getStringExtra("tasKind"));

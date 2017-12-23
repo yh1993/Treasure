@@ -20,26 +20,34 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dell.treasure.R;
 import com.dell.treasure.SignInActivity;
+import com.dell.treasure.dao.Task;
+import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.rank.RegisterActivity;
 import com.dell.treasure.service.NetService;
+import com.dell.treasure.service.PrepareService;
 import com.dell.treasure.service.UserInfo;
 import com.dell.treasure.share.InviteActivity;
 import com.dell.treasure.source.TasksRepository;
 import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.ActivityUtils;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
+import com.orhanobut.logger.Logger;
 
+import org.greenrobot.greendao.query.Query;
 import org.ksoap2.SoapFault;
+
+import java.util.List;
 
 
 public class TasksActivity extends AppCompatActivity {
@@ -52,6 +60,7 @@ public class TasksActivity extends AppCompatActivity {
     private TextView money;
     private TextView user;
     private UserInfoReceiver userInfoReceiver;
+    private TaskInfoReceiver taskInfoReceiver;
     private LocalBroadcastManager broadcastManager;
     private NavigationView navigationView;
     private Fragment currentFragment;
@@ -64,6 +73,10 @@ public class TasksActivity extends AppCompatActivity {
 
     private CurrentUser userInfo;
     private String currentState;
+    private String taskTmp;
+    private String fromUserIdTmp;
+    private Task task;
+    private TaskDao taskDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,14 +109,18 @@ public class TasksActivity extends AppCompatActivity {
         //注册本地广播
         broadcastManager = LocalBroadcastManager.getInstance(TasksActivity.this);
         userInfoReceiver = new UserInfoReceiver();
+        taskInfoReceiver = new TaskInfoReceiver();
         IntentFilter intentFilter = new IntentFilter();
+        IntentFilter taskFilter = new IntentFilter();
         intentFilter.addAction("com.dell.treasure.RECEIVER_UserInfo");
+        taskFilter.addAction("com.dell.treasure.RECEIVER_TaskInfo");
         broadcastManager.registerReceiver(userInfoReceiver, intentFilter);
+        broadcastManager.registerReceiver(taskInfoReceiver, taskFilter);
 
         currentState = userInfo.getCurrentState();
-        if(currentState.equals("000")||currentState.equals("005")){
-            new isSignTask().execute();
-        }
+//        if(currentState.equals("000")||currentState.equals("005")){
+//            new isSignTask().execute();
+//        }
 
         //判断是否第一次启动
         sp = getSharedPreferences(username, Context.MODE_PRIVATE);
@@ -140,6 +157,8 @@ public class TasksActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         if(mTasksPresenter != null){
             mTasksPresenter.start();
+//            mTasksPresenter.loadTasks(true);
+
         }
 
     }
@@ -160,10 +179,55 @@ public class TasksActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, 1);
         }
         isFirstSign();
-        if(!userInfo.getTasKind().equals("0")){
-            startService(new Intent(TasksActivity.this,NetService.class));
+//        if(!userInfo.getTasKind().equals("0")){
+//            startService(new Intent(TasksActivity.this,NetService.class));
+//        }
+//        judgeCurrentState();
+        isReceiveTaskFromUser();
+        mTasksPresenter.loadTasks(true);
+    }
+
+    private void isReceiveTaskFromUser() {
+        taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
+        task = Task.getInstance();
+        taskTmp = userInfo.getTaskIdTmp();
+        fromUserIdTmp = userInfo.getFromUserId();
+        Log.d("result",TAG + " isReceiveTaskFromUser: "+taskTmp+" "+fromUserIdTmp);
+        if(taskTmp != ""&& taskTmp != null){
+            Log.d("result",TAG + " isReceiveTaskFromUser: received task from user");
+            Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(taskTmp)).build();
+            List<Task> tasks = taskQuery.list();
+            if (tasks.size() > 0) {
+                task.setTask(tasks.get(0));
+                taskTODO();
+            }else {
+                //查询任务；
+                new getTaskInfo().execute();
+            }
         }
-        judgeCurrentState();
+        userInfo.setTaskIdTmp(null);
+        userInfo.setFromUserId(null);
+    }
+
+    void taskTODO(){
+        if(task.getFlag() >= -1){
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TasksActivity.this);
+            alertDialogBuilder.setTitle("提示");
+            alertDialogBuilder.setMessage("你好，你已经参与了该任务。。。");
+            alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
+            alertDialogBuilder.create().show();
+        }else {
+            userInfo.setLastId(fromUserIdTmp);
+            task.setLastId(fromUserIdTmp);
+            taskDao.update(task);
+            Log.d("result",TAG + " taskTODO: "+task.getLastId());
+            startActivity(new Intent(this,TaskDetails.class));
+        }
     }
 
     private void judgeCurrentState() {
@@ -240,6 +304,7 @@ public class TasksActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         broadcastManager.unregisterReceiver(userInfoReceiver);
+        broadcastManager.unregisterReceiver(taskInfoReceiver);
     }
 
     private void firstSign() {
@@ -294,13 +359,19 @@ public class TasksActivity extends AppCompatActivity {
     }
 
     private class NavigationItemSelected implements NavigationView.OnNavigationItemSelectedListener{
+
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
             Intent intent = new Intent();
+            startService(new Intent(TasksActivity.this, UserInfo.class));
             switch (item.getItemId()){
                 case R.id.navigation_item_yes:
-                    currentIndex = 0;
+//                    currentIndex = 0;
                     item.setChecked(true);
+                    mTasksPresenter.setFiltering(TasksFilterType.ACTIVE_TASKS);
+                    mTasksPresenter.loadTasks(false);
+
 //                    currentFragment = new FristFragment();
 //                    switchContent(currentFragment);
                     break;
@@ -322,7 +393,7 @@ public class TasksActivity extends AppCompatActivity {
                 case R.id.navigation_item_task:
                     mTasksPresenter.setFiltering(TasksFilterType.COMPLETED_TASKS);
                     mTasksPresenter.loadTasks(false);
-                    completedTasks();
+
                     break;
 //                case R.id.navigation_item_share:
 //                    intent.setClass(TasksActivity.this, InviteActivity.class);
@@ -345,6 +416,66 @@ public class TasksActivity extends AppCompatActivity {
             String Money = intent.getStringExtra("money");
             points.setText(point);
             money.setText(Money);
+        }
+    }
+
+
+    public class TaskInfoReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Boolean isEnd = intent.getBooleanExtra("isEnd",false);
+            if(mTasksPresenter != null){
+//            mTasksPresenter.start();
+               mTasksPresenter.loadTasks(true);
+                Logger.d("收到 ");
+            }
+        }
+    }
+
+    private class getTaskInfo extends AsyncTask<Void, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String json = null;
+            try {
+                json = NetUtil.getTaskInfo(taskTmp);
+            } catch (SoapFault | NullPointerException soapFault) {
+                soapFault.printStackTrace();
+            }
+            //获取消息
+            String[] split = json.split(";");
+            String bleId = split[0];
+            String date = split[1];
+            String money = split[2];
+            String needNum = split[3];
+
+            Log.d("result",TAG + bleId +" "+date+" "+money+" "+needNum);
+            userInfo.setLastId(fromUserIdTmp);
+            userInfo.setStartTime(date);
+            userInfo.setTarget_ble(bleId);
+            userInfo.setTaskId(taskTmp);
+            userInfo.setNeedNum(needNum);
+
+            SharedPreferences tasknum = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = tasknum.edit();
+            editor.putString("startTime",date);  //任务开始时间
+            editor.putString("money",money);
+            editor.putString("needNum",needNum);
+            editor.apply();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            Intent intent = new Intent(TasksActivity.this,PrepareService.class);
+            TasksActivity.this.startService(intent);
+
         }
     }
 

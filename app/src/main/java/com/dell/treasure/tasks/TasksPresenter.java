@@ -19,8 +19,13 @@ package com.dell.treasure.tasks;
 import android.support.annotation.NonNull;
 
 import com.dell.treasure.dao.Task;
+import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.source.TasksDataSource;
 import com.dell.treasure.source.TasksRepository;
+import com.dell.treasure.support.MyApp;
+import com.orhanobut.logger.Logger;
+
+import org.greenrobot.greendao.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +41,11 @@ public class TasksPresenter implements TasksContract.Presenter {
 
     private final TasksContract.View mTasksView;
 
-    private TasksFilterType mCurrentFiltering = TasksFilterType.ACTIVE_TASKS;
+    public TasksFilterType mCurrentFiltering = TasksFilterType.ACTIVE_TASKS;
 
     private boolean mFirstLoad = true;
+    private Task task;
+    private TaskDao taskDao;
 
     public TasksPresenter(@NonNull TasksRepository tasksRepository, @NonNull TasksContract.View tasksView) {
         mTasksRepository = tasksRepository;
@@ -80,17 +87,22 @@ public class TasksPresenter implements TasksContract.Presenter {
             @Override
             public void onTasksLoaded(List<Task> tasks) {
                 List<Task> tasksToShow = new ArrayList<Task>();
+//                taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
+//                Query<Task> taskQuery1 = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-3),TaskDao.Properties.Flag.le(3)).build();
+//                List<Task> tasks1 = taskQuery1.list();
+
 
                 // We filter the tasks based on the requestType
                 for (Task task : tasks) {
                     switch (mCurrentFiltering) {
                         case ALL_TASKS:
                             if (task.getFlag() > -3) {
+                                Logger.d(task.getTaskId()+" "+task.getFlag());
                                 tasksToShow.add(task);
                             }
                             break;
                         case ACTIVE_TASKS:
-                            if (task.getFlag() < 2 && task.getFlag() > -3) {
+                            if (task.getFlag() < 2 && task.getFlag() >= -3) {
                                 tasksToShow.add(task);
                             }
                             break;
@@ -135,7 +147,7 @@ public class TasksPresenter implements TasksContract.Presenter {
             processEmptyTasks();
         } else {
             // Show the list of tasks
-            mTasksView.showTasks(tasks);
+            mTasksView.showTasks(tasks,mCurrentFiltering);
             // Set the filter label's text.
             showFilterLabel();
         }

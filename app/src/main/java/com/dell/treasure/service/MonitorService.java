@@ -66,14 +66,15 @@ public class MonitorService extends Service {
                         Logger.d("任务标志 "+task.getTaskId()+" "+task.getBeginTime()+" "+task.getFlag());
                     }
                     try {
-                        times++;
-                        if(times == 3){
-                            times = 0;
+
+                        if(times % 2 == 0){
                             Log.d("result", "if: times "+times);
                             Intent posIntent = new Intent(MonitorService.this, UploadService.class);
                             startService(posIntent);
                         }
+                        times++;
                         Thread.sleep(60 * 1000);
+
 
                     } catch (InterruptedException e) {
                         // TODO Auto-generated catch block

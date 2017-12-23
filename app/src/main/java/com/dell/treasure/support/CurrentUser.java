@@ -23,8 +23,12 @@ public class CurrentUser {
     private String currentNum = "";
     private String currentLevel = "";
     private boolean isJoin = false;
-    private String taskIdTmp;
+    private String taskIdTmp = null;
     private String fromUserId;
+
+    private String lastTime = "0";       //当用户再次参与任务时，获取之前参与的时间和路程。
+    private String lastDistance = "0";
+    private int isContimueFlag;    //再次参与
 
     private CurrentUser(){}
 
@@ -185,5 +189,29 @@ public class CurrentUser {
 
     public void setFromUserId(String fromUserId) {
         this.fromUserId = fromUserId;
+    }
+
+    public String getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(String lastTime) {
+        this.lastTime = lastTime;
+    }
+
+    public String getLastDistance() {
+        return lastDistance;
+    }
+
+    public void setLastDistance(String lastDistance) {
+        this.lastDistance = lastDistance;
+    }
+
+    public int getIsContimueFlag() {
+        return isContimueFlag;
+    }
+
+    public void setIsContimueFlag(int isContimueFlag) {
+        this.isContimueFlag = isContimueFlag;
     }
 }

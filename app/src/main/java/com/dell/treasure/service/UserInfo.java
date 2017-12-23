@@ -26,6 +26,7 @@ import java.util.List;
  * Created by DELL on 2016/6/16.
  */
 public class UserInfo extends Service {
+
     private final Handler msgHandler = new Handler()
     {
         public void handleMessage(Message msg)

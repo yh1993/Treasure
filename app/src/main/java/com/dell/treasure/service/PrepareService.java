@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.dell.treasure.R;
 import com.dell.treasure.support.AppSurvice;
@@ -21,7 +22,6 @@ import static com.dell.treasure.support.ToolUtil.stringToDate;
  * 判断任务是否过期
  * 先判断程序是否启动
  * 确定是否联网
- * 任务插入数据库
  */
 
 public class PrepareService extends Service {
@@ -41,7 +41,7 @@ public class PrepareService extends Service {
     //任务是否过期
     private void isOverdue() {
         Date lostTime = stringToDate(user.getStartTime());
-
+        Logger.d(" "+user.getStartTime()+" "+lostTime);
         long lostT = new Date().getTime() - lostTime.getTime();
 
         Logger.d(new Date()+" "+ lostTime +" "+lostT);

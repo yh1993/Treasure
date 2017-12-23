@@ -6,8 +6,8 @@ import android.os.Bundle;
 
 public class AppLinksActivity extends BaseActivity {
 
-	private static final String SCHEME_SCHEME = "treasurelink";
-	private static final String SCHEME_HOST = "com.mob.moblink.demo";
+	private static final String SCHEME_SCHEME = "mlink";
+	private static final String SCHEME_HOST = "com.dell.treasure";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

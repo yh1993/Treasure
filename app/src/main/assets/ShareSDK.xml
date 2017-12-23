@@ -110,16 +110,20 @@
     
 	<!-- ShareByAppClient标识是否使用微博客户端分享，默认是false -->
 
+
+    <!--AppId="100371282"-->
+    <!--AppKey="aed9b0303e3ed1e27bae87c33761161d"-->
 	<QZone
-		AppId="100371282"
-		AppKey="aed9b0303e3ed1e27bae87c33761161d"
+        AppId="1106547232"
+        AppKey="ljyk2paRltF885o4"
 		Enable="true"
 		Id="6"
 		SortId="6" />
 
+
 	<QQ
-        AppId="100371282"
-        AppKey="aed9b0303e3ed1e27bae87c33761161d"
+        AppId="1106547232"
+        AppKey="ljyk2paRltF885o4"
         Enable="true"
         Id="7"
         ShareByAppClient="true"

@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void gameOver() {
+        tableLayout.setVisibility(View.INVISIBLE);
         tableLayout1.setVisibility(View.VISIBLE);
         if(overFlag==1){
             overFlag = 0;
@@ -482,6 +483,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         protected void onPostExecute(String file_url) {
             // dismiss the dialog once done
+            tableLayout.setVisibility(View.GONE);
+//            back.setVisibility(View.INVISIBLE);
+
+            save.setVisibility(View.VISIBLE);
             if(pDialog != null) {
                 pDialog.dismiss();
                 pDialog = null;

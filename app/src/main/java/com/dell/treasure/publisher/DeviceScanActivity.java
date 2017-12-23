@@ -38,6 +38,9 @@ import java.util.List;
  * 对扫描到的ble进行点击，进入设备绑定界面Ble_record
  */
 public class DeviceScanActivity extends AppCompatActivity {
+    private static final int REQUEST_ENABLE_BT = 1;
+    // Stops scanning after 5 seconds.
+    private static final long SCAN_PERIOD = 5000;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
@@ -45,11 +48,6 @@ public class DeviceScanActivity extends AppCompatActivity {
     private boolean mScanning;
     private Handler mHandler;
     private ListView listView;
-
-    private static final int REQUEST_ENABLE_BT = 1;
-    // Stops scanning after 5 seconds.
-    private static final long SCAN_PERIOD = 5000;
-
 //    private MyApp myApp;
     private CurrentUser user;
 
@@ -263,7 +261,7 @@ public class DeviceScanActivity extends AppCompatActivity {
             if (view == null) {
                 holder=new ViewHolder();
                 view = mInflater.inflate(R.layout.ble_list, parent,false);
-                holder.devicePic = (ImageView)view.findViewById(R.id.dataImg);
+                holder.devicePic = (ImageView) view.findViewById(R.id.dataImg);
                 holder.deviceAddressView = (TextView)view.findViewById(R.id.address);
                 holder.deviceNameView = (TextView)view.findViewById(R.id.name);
                 holder.deviceRssi = (TextView)view.findViewById(R.id.type);

@@ -33,7 +33,7 @@ public interface TasksContract {
 
         void setLoadingIndicator(boolean active);
 
-        void showTasks(List<Task> tasks);
+        void showTasks(List<Task> tasks,TasksFilterType type);
 
 //        void showAddTask();
 

@@ -5,14 +5,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.dell.treasure.SignInActivity;
+import com.dell.treasure.dao.Task;
+import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.service.AdvertiserService;
 import com.dell.treasure.service.AlarmService;
 import com.dell.treasure.service.PrepareService;
 import com.dell.treasure.service.ScannerService;
 import com.dell.treasure.service.TraceService;
+import com.orhanobut.logger.Logger;
+
+import org.greenrobot.greendao.query.Query;
+
+import java.util.List;
 
 import cn.jpush.android.api.JPushInterface;
 
@@ -24,13 +32,19 @@ public class JpushReceiver extends BroadcastReceiver {
 
     public static final String TAG = "JpushReceiver";
     public static final String TASK = "task";
+    public static boolean running = false;
+    private Task task;
+    private TaskDao taskDao;
     private SharedPreferences sp;
+    private CurrentUser user;
+    private LocalBroadcastManager localBroadcastManager;
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("result",TAG);
-        CurrentUser user = CurrentUser.getOnlyUser();
+        user = CurrentUser.getOnlyUser();
         Bundle bundle = intent.getExtras();
         sp = context.getSharedPreferences(TASK, Context.MODE_PRIVATE);
+        localBroadcastManager = LocalBroadcastManager.getInstance(context);
         if (JPushInterface.ACTION_REGISTRATION_ID.equals(intent.getAction())) {
 
         } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction()) && !user.getUsername().equals("yh")){
@@ -42,19 +56,37 @@ public class JpushReceiver extends BroadcastReceiver {
              */
             //获取自定义消息的内容字段
             String extra = bundle.getString(JPushInterface.EXTRA_MESSAGE);
-            if(extra!= null && extra.length() > 3){
+            if(extra!= null && extra.length() >= 3 ){
+
                 String mFlag = extra.substring(0,3);
-                if (mFlag.equals("all")) {
-                    Log.d(TAG, "onReceive: "+AdvertiserService.running);
+                if (mFlag.equals("all") && !running) {
+                    Logger.d(TAG+"onReceive: "+AdvertiserService.running);
+                    String[] split = extra.split("\\+");
+                    String taskId = split[1];
+                    String bleId = split[2];
+                    String log = split[3];
+                    String lat = split[4];
+                    String date = split[5];
+                    String money = split[6];
+                    String needNum = split[7];
+
+                    taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
+
+                    Query<Task> taskQueryCur = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(taskId)).build();
+                    List<Task> tasksCur = taskQueryCur.list();
+                    if(tasksCur.size() > 0){
+                        return;
+                    }
+                    Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-3),TaskDao.Properties.Flag.le(1)).build();
+                    List<Task> tasks = taskQuery.list();
+                    for(Task task: tasks){
+                        task.setFlag(3);
+                        Logger.d(task.getTaskId()+task.getFlag());
+                        taskDao.update(task);
+                        Logger.d(task.getTaskId()+task.getFlag());
+                    }
+                    stopTask(context);
                     if (!AdvertiserService.running) {
-                        String[] split = extra.split("\\+");
-                        String taskId = split[1];
-                        String bleId = split[2];
-                        String log = split[3];
-                        String lat = split[4];
-                        String date = split[5];
-                        String money = split[6];
-                        String needNum = split[7];
 
                         user.setLastId("0");
                         user.setStartTime(date);
@@ -62,10 +94,10 @@ public class JpushReceiver extends BroadcastReceiver {
                         user.setTaskId(taskId);
                         user.setNeedNum(needNum);
 
-
                         SharedPreferences.Editor editor = sp.edit();
                         editor.putString("startTime",date);  //任务开始时间
                         editor.putString("money",money);
+                        editor.putString("needNum",needNum);
                         editor.apply();
                         Log.d("result", TAG + "收到task id date needNum" +taskId + date+needNum);
 
@@ -78,26 +110,23 @@ public class JpushReceiver extends BroadcastReceiver {
 
 //                    user.setTarget_ble("");
 //                    user.setLastId("");
-                    ScannerService.isFirst = 0;
-                    if (ScannerService.running) {
-                        Intent scanIntent = new Intent(context, ScannerService.class);
-                        context.stopService(scanIntent);
+                    stopTask(context);
+                    running = false;
+
+                    taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
+                    Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-3),TaskDao.Properties.Flag.le(1)).build();
+                    List<Task> tasks = taskQuery.list();
+                    for(Task task : tasks){
+                        task.setFlag(3);
+                        Logger.d(task.getTaskId()+task.getFlag());
+                        taskDao.update(task);
+                        Logger.d(task.getTaskId()+task.getFlag());
                     }
-                    if (AdvertiserService.running) {
-                        Intent i = new Intent(context, AdvertiserService.class);
-                        context.stopService(i);
-                    }
-//                    user.setBeginTime("");
-//                    user.setEndTime("");
-//                    Intent intentAlarm = new Intent(context,AlarmService.class);
-//                    context.startService(intentAlarm);
-                    user.clear();
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.putBoolean("isFound", false);
-                    editor.putString("level", "0");
-                    editor.putString("num","0");
-                    editor.apply();
+                    Intent taskEnd = new Intent("com.dell.treasure.RECEIVER_TaskInfo");
+                    taskEnd.putExtra("isEnd",true);
+                    localBroadcastManager.sendBroadcast(taskEnd);
                 }
+                running = false;
             }
             // 自定义消息不会展示在通知栏，完全要开发者写代码去处理
         } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
@@ -135,6 +164,28 @@ public class JpushReceiver extends BroadcastReceiver {
         } else {
             Log.d("result", "Unhandled intent - " + intent.getAction());
         }
+    }
+
+    void stopTask(Context context){
+        ScannerService.isFirst = 0;
+        if (ScannerService.running) {
+            Intent scanIntent = new Intent(context, ScannerService.class);
+            context.stopService(scanIntent);
+        }
+        if (AdvertiserService.running) {
+            Intent i = new Intent(context, AdvertiserService.class);
+            context.stopService(i);
+        }
+//                    user.setBeginTime("");
+//                    user.setEndTime("");
+//                    Intent intentAlarm = new Intent(context,AlarmService.class);
+//                    context.startService(intentAlarm);
+        user.clear();
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean("isFound", false);
+        editor.putString("level", "0");
+        editor.putString("num","0");
+        editor.apply();
     }
 
 }

@@ -114,7 +114,8 @@
             android:layout_margin="8dp"
             android:text="放弃"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/game_yes"
@@ -124,7 +125,8 @@
             android:enabled="false"
             android:text="参与"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="gone"/>
     </LinearLayout>
 
 </LinearLayout>

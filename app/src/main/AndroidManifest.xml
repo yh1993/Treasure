@@ -56,19 +56,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".SplashActivity2"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="treasure.com" android:path="/demo/a" android:scheme="mlink"/>
-            </intent-filter>
-        </activity>
+
         <activity
             android:name=".SignInActivity"
             android:launchMode="singleTask"
@@ -112,12 +100,12 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
-        <activit
+        <activity
             android:name=".tasks.TaskDetails"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
 
-        </activit>
+        </activity>
 
         <activity
             android:name=".tasks.ActiveTackDetails"
@@ -134,8 +122,8 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="com.mob.moblink.demo" android:scheme="http"/>
-                <data android:host="com.mob.moblink.demo" android:scheme="https"/>
+                <data android:host="7z7y.ulml.mob.com" android:scheme="http"/>
+                <data android:host="7z7y.ulml.mob.com" android:scheme="https"/>
 
                 <!-- <data android:scheme="http" android:host="7pb6.ulml.mob.com" />
                 <data android:scheme="https" android:host="7pb6.ulml.mob.com" /> -->
@@ -148,6 +136,21 @@
             android:launchMode="standard"
             android:screenOrientation="portrait">
         </activity>
+
+        <activity
+            android:name=".SplashActivity2"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="com.dell.treasure" android:path="/demo/a" android:scheme="mlink"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".share.InviteDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

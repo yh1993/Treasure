@@ -11,10 +11,13 @@ import android.util.Log;
 import com.dell.treasure.R;
 import com.dell.treasure.dao.Task;
 import com.dell.treasure.dao.TaskDao;
+import com.dell.treasure.source.TasksRepository;
+import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
 import com.dell.treasure.tasks.TaskDetails;
+import com.dell.treasure.tasks.TasksPresenter;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.greendao.query.Query;
@@ -34,6 +37,9 @@ public class NetService extends Service {
     private CurrentUser user;
     private boolean isNet;
     private MyApp myApp;
+    private TasksRepository mtasksRepository;
+    private TasksLocalDataSource mtasksLocalDataSource;
+
 
     @Override
     public void onCreate() {
@@ -44,6 +50,8 @@ public class NetService extends Service {
         if(user.getUsername() != null) {
             new NetWorkTask().execute();
         }
+        mtasksLocalDataSource = TasksLocalDataSource.getInstance();
+        mtasksRepository = TasksRepository.getInstance(mtasksLocalDataSource);
     }
 
     @Nullable
@@ -74,12 +82,18 @@ public class NetService extends Service {
     }
 
     private void insertTask(){
+        Task task1 = new Task(null,"0",user.getTaskId(),user.getTarget_ble(),"","",-3);
+        mtasksRepository.saveTask(task1);
+
         taskDao = myApp.getDaoSession().getTaskDao();
         task = Task.getInstance();
-        Task task1 = new Task(null,"0",user.getTaskId(),user.getTarget_ble(),"","",-3);
-
-        taskDao.insert(task1);
-        Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.eq(-3)).build();
+        Query<Task> taskQuery1 = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-3),TaskDao.Properties.Flag.le(3)).build();
+        List<Task> tasks1 = taskQuery1.list();
+        for(int i = 0;i<tasks1.size();i++){
+            task.setTask(tasks1.get(i));
+            Logger.d(task.getTaskId()+task.getFlag());
+        }
+        Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(task1.getTaskId())).build();
         List<Task> tasks = taskQuery.list();
         if (tasks.size() > 0) {
             task.setTask(tasks.get(0));

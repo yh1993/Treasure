@@ -33,9 +33,12 @@ public class CommonUtils {
 
 	static {
 		if (DEBUGGABLE) {
-			SHARE_URL = "http://192.168.180.86:8000";
+//			SHARE_URL = "http://192.168.180.86:8000";
+			SHARE_URL = "http://hgfdodo.win";
 		} else {
-			SHARE_URL = "http://f.moblink.mob.com";
+//			SHARE_URL = "http://f.moblink.mob.com";
+//			SHARE_URL = "http://39.106.142.138:8080";
+			SHARE_URL = "http://hgfdodo.win";
 		}
 	}
 
@@ -99,23 +102,23 @@ public class CommonUtils {
 	 * @param context
 	 * @return
 	 */
-//	public static Dialog getMobIdDialog(Context context) {
-//		final Dialog dialog = new Dialog(context, R.style.Dialog);
-//		dialog.setContentView(R.layout.alert_dialog);
-//		dialog.findViewById(R.id.dialog_btn_no).setVisibility(View.GONE);
-//		dialog.findViewById(R.id.dialog_v_line).setVisibility(View.GONE);
-//		TextView tvTitle = (TextView) dialog.findViewById(R.id.tv_dialog_title);
-//		tvTitle.setText(R.string.please_get_mobid);
-//		TextView tvYes = (TextView) dialog.findViewById(R.id.dialog_btn_yes);
-//		tvYes.setText(R.string.close);
-//		tvYes.setOnClickListener(new View.OnClickListener() {
-//			public void onClick(View v) {
-//				dialog.dismiss();
-//			}
-//		});
-//		dialog.setCanceledOnTouchOutside(true);
-//		return dialog;
-//	}
+	public static Dialog getMobIdDialog(Context context) {
+		final Dialog dialog = new Dialog(context, R.style.Dialog);
+		dialog.setContentView(R.layout.alert_dialog);
+		dialog.findViewById(R.id.dialog_btn_no).setVisibility(View.GONE);
+		dialog.findViewById(R.id.dialog_v_line).setVisibility(View.GONE);
+		TextView tvTitle = (TextView) dialog.findViewById(R.id.tv_dialog_title);
+		tvTitle.setText(R.string.please_get_mobid);
+		TextView tvYes = (TextView) dialog.findViewById(R.id.dialog_btn_yes);
+		tvYes.setText(R.string.close);
+		tvYes.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		dialog.setCanceledOnTouchOutside(true);
+		return dialog;
+	}
 
 	/**
 	 * 复制res中的图片到sdcard中

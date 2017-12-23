@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.dell.treasure.support.CommonUtils;
 
@@ -43,6 +44,11 @@ public abstract class ShareableActivity extends BaseActivity {
 	 * @param res 场景还原时的参数
 	 */
 	public void onReturnSceneData(HashMap<String, Object> res) {
+		Log.d("result", "onReturnSceneData: "+res.size());
+		for (Map.Entry<String, Object> entry : res.entrySet()) {
+			Log.d("result", "onReturnSceneData: "+entry.getKey() + " : " + entry.getValue());
+		}
+
 		if (res != null) {
 			if (TextUtils.isEmpty(path)) {
 				path = (String)res.get("path");
@@ -58,12 +64,12 @@ public abstract class ShareableActivity extends BaseActivity {
 			}
 		}
 
-		if (dialog == null) {
-			dialog = CommonUtils.getDialog(ShareableActivity.this, path, source, paramStr);
-		}
-		if (!dialog.isShowing()) {
-			dialog.show();
-		}
+//		if (dialog == null) {
+//			dialog = CommonUtils.getDialog(ShareableActivity.this, path, source, paramStr);
+//		}
+//		if (!dialog.isShowing()) {
+//			dialog.show();
+//		}
 	}
 
 	/**

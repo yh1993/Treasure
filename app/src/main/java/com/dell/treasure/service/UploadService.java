@@ -103,6 +103,7 @@ public class UploadService extends Service {
         }
 
         ownTime = stringToDate(endTime).getTime();
+        Logger.d(endTime + " "+stringToDate(endTime) );
 
         long start = stringToDate(beginTime).getTime();
         queryDistance(start,ownTime);
@@ -202,9 +203,10 @@ public class UploadService extends Service {
                     JSONObject dataJson = new JSONObject(arg0);
                     if (null != dataJson && dataJson.has("status") && dataJson.getInt("status") == 0) {
                         double distance = dataJson.getDouble("distance") / 1000;
+                        double lastDis = Double.parseDouble(user.getLastDistance());
                         DecimalFormat df = new DecimalFormat("#.0");
-                        user.setDistance(df.format(distance));  //千米
-                        Logger.d(" "+user.getDistance()+" km");
+                        user.setDistance(df.format(distance+lastDis));  //千米
+                        Logger.d(distance+" "+user.getLastDistance()+" "+ user.getDistance()+" km");
                     }
                     // TODO Auto-generated catch block
                 } catch (JSONException e) {
@@ -231,17 +233,17 @@ public class UploadService extends Service {
             endTime = task.getEndTime();
             ownTime = stringToDate(endTime).getTime();
             long start = stringToDate(beginTime).getTime();
-            timeLong = (ownTime- start) / 1000.0 / 60.0;
+            double lastTime = Double.parseDouble(user.getLastTime());
+            timeLong = (ownTime- start) / 1000.0 / 60.0 + lastTime;
         }
 
         protected String doInBackground(String... args) {
 
             DecimalFormat df = new DecimalFormat("#.0");
             String json = null;
-            Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+beginTime+" "+ endTime+" "+user.getDistance()+" "+df.format(timeLong));
             try {
                 json = NetUtil.RecordParti(userId, taskId, df.format(timeLong), user.getDistance(), way, lastId,isFound);
-                Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+beginTime+" "+ endTime+" "+user.getDistance()+" "+json);
+                Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+timeLong+" "+user.getDistance()+" "+json);
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();
             }

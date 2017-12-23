@@ -2,11 +2,11 @@ package com.dell.treasure.tasks;
 
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,11 +26,15 @@ import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
+import com.dell.treasure.support.NotificationHelper;
+import com.orhanobut.logger.Logger;
 
 import org.greenrobot.greendao.query.Query;
 import org.ksoap2.SoapFault;
 
 import java.util.List;
+
+import static com.dell.treasure.support.NotificationHelper.NOTICE_ID;
 
 /**
  * Created by DELL on 2017/7/12.
@@ -58,42 +62,24 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
     private TextView strategy_text;
     private TextView level_text;
     private TextView num_text;
+    private ProgressDialog pDialog = null;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        Log.d("result",TAG);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_taskdetails);
+        NotificationHelper.clearNotification(this, NOTICE_ID);
 
         user = CurrentUser.getOnlyUser();
         user.setTasKind("0");
 
-        Intent i = getIntent();
-        Uri uri = i.getData();
-
         initView();
         initData();
 
-        if (uri != null){
-            Log.d("result",TAG + uri);
-            fromuserIdTmp = uri.getQueryParameter("userId");
-            taskId = uri.getQueryParameter("taskId");
-
-            Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(taskId)).build();
-            List<Task> tasks = taskQuery.list();
-            if (tasks.size() > 0) {
-                task.setTask(tasks.get(0));
-                taskTODO();
-            }else {
-                //查询任务；
-            }
-
-        }else {
-            taskId = user.getTaskId();
-            userId = user.getUserId();
-            fromuserId = user.getLastId();
-            queryData();
-            new JoinSubmit().execute();
-        }
+        queryData();
+        taskId = task.getTaskId();
+        userId = user.getUserId();
+        fromuserId = task.getLastId();
+        new JoinSubmit().execute();
     }
 
     void initData(){
@@ -153,8 +139,10 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 onBack();
                 break;
             case R.id.game_yes:
-                Log.d("result","num needNum"+Integer.parseInt(num)+" "+Integer.parseInt(user.getNeedNum()));
-                if(Integer.parseInt(num) < Integer.parseInt(user.getNeedNum())){
+                SharedPreferences sp = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
+                String needNum = sp.getString("needNum", null);
+                Log.d("result","num needNum"+Integer.parseInt(num)+" "+Integer.parseInt(needNum));
+                if(Integer.parseInt(num) < Integer.parseInt(needNum)){
                     joinTask();
                     user.setJoin(true);
                 }else{
@@ -167,8 +155,7 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
     //加入任务
     private void joinTask() {
         task.setFlag(-1);
-        Log.d("result",TAG + " "+task.getId());
-        startService(scanIntent);
+        Logger.d(TAG + " "+task.getId());
         new AlertDialog.Builder(TaskDetails.this)
                 .setTitle("提示")
                 .setMessage("是否愿意将任务消息扩散给更多的人？此操作会消耗一些电量，同时您也会得到更多的奖励。")
@@ -176,19 +163,21 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 .setPositiveButton("接受", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        startService(new Intent(TaskDetails.this, AdvertiserService.class));
-                        startActivity(new Intent(TaskDetails.this,TasksActivity.class));
                         task.setFlag(0);
                         taskDao.update(task);
+                        startService(scanIntent);
+                        startService(new Intent(TaskDetails.this, AdvertiserService.class));
+                        startActivity(new Intent(TaskDetails.this,TasksActivity.class));
                         finish();
                     }
                 })
                 .setNegativeButton("放弃", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        startActivity(new Intent(TaskDetails.this,TasksActivity.class));
                         taskDao.update(task);
+                        startService(scanIntent);
+                        startActivity(new Intent(TaskDetails.this,TasksActivity.class));
+                        dialog.dismiss();
                         finish();
                     }
                 })
@@ -221,13 +210,18 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            pDialog = new ProgressDialog(TaskDetails.this);
+            pDialog.setMessage("任务获取中..");
+            pDialog.setIndeterminate(false);//setIndeterminate(true)的意思就是不明确具体进度,进度条在最大值与最小值之间来回移动,形成一个动画效果
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
 
         protected String doInBackground(String... args) {
 
             try {
                 strategy = NetUtil.getInfoDetail();
-                Log.d("result",TAG + strategy);
+                Logger.d(TAG + strategy);
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();
             }
@@ -252,20 +246,26 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                     editor.putString("strategy",strategy);
                 }
                 editor.apply();
-                Log.d("result",TAG +"level num"+ level+" "+num);
+                Logger.d(TAG +"level num"+ level+" "+num);
             }
             return null;
         }
 
         protected void onPostExecute(String file_url) {
             // dismiss the dialog once donea
-            Log.d("result",TAG + "task needNum: "+user.getNeedNum());
             if(!strategy.isEmpty()) {
                 strategy_text.setText(strategy);
             }
             level_text.setText(level);
             num_text.setText(num);
+            game_yes.setVisibility(View.VISIBLE);
+            game_no.setVisibility(View.VISIBLE);
             game_yes.setEnabled(true);
+
+            if(pDialog != null) {
+                pDialog.dismiss();
+                pDialog = null;
+            }
 
         }
 

@@ -83,5 +83,10 @@
     <string name="param">参数</string>
     <string name="close">关闭</string>
 
+    <string name="dialog_text">是否进行还原场景？</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="please_get_mobid">呃，出现不可名状的错误，请重试</string>
+
 
 </resources>
