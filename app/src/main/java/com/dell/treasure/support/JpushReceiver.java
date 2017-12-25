@@ -47,7 +47,7 @@ public class JpushReceiver extends BroadcastReceiver {
         localBroadcastManager = LocalBroadcastManager.getInstance(context);
         if (JPushInterface.ACTION_REGISTRATION_ID.equals(intent.getAction())) {
 
-        } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction()) && !user.getUsername().equals("yh")){
+        } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction())){
             /**
              * 自定义消息，用户不可见，推送求助任务，所有人都能接收到，并保存到数据库中(保存数据库也移到PrepareService中)
              * 自定义消息中包括，bleId,经纬度log,lat,date,taskId,以'+'分隔

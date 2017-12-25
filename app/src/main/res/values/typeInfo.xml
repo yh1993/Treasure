@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="typeInfo">
-        <item>家人</item>
-        <item>宠物</item>
-        <item>贵重物品</item>
-    </string-array>
-</resources>

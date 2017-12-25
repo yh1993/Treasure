@@ -38,11 +38,11 @@ public class SignUpActivity extends Activity{
     private EditText username;
     private EditText password;
     private EditText alipay;
-    private EditText invitation;
+//    private EditText invitation;
     private ProgressDialog pDialog;
 
-    private TextInputLayout userTextInput,passwordTextInput,editAlipay,invitationInput;
-    private String Sname,Spassword,SeditAlipay,Sinvitation;
+    private TextInputLayout userTextInput,passwordTextInput,editAlipay;  // invitationInput;
+    private String Sname,Spassword,SeditAlipay;   // Sinvitation;
     private MyHandler myHandler = new MyHandler(this);
 
     @Override
@@ -168,7 +168,7 @@ public class SignUpActivity extends Activity{
         protected String doInBackground(Void... params) {
             Boolean isSign = false;
             try {
-                isSign = NetUtil.isSignPeriod();
+                isSign = NetUtil.isSignPeriod();   //true 为注册阶段  false 任务阶段
             } catch (SoapFault soapFault) {
                 soapFault.printStackTrace();
             }

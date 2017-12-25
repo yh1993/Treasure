@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.dell.treasure.publisher.DeviceScanActivity;
 import com.dell.treasure.share.ShareableActivity;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
@@ -74,12 +73,7 @@ public class SplashActivity2 extends ShareableActivity {
                     if(getIntent().getStringExtra("tasKind") != null){
                         user.setTasKind(getIntent().getStringExtra("tasKind"));
                     }
-
-                    if(username.equals("yh")){
-                        intent.setClass(SplashActivity2.this, DeviceScanActivity.class);
-                    }else{
-                        intent.setClass(SplashActivity2.this, TasksActivity.class);
-                    }
+                    intent.setClass(SplashActivity2.this, TasksActivity.class);
                 } else {
                     intent.setClass(SplashActivity2.this, SignInActivity.class);
                 }

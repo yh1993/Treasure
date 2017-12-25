@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.dell.treasure.publisher.DeviceScanActivity;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.NetUtil;
 import com.dell.treasure.tasks.TasksActivity;
@@ -44,7 +43,7 @@ public class SignInActivity extends Activity{
     public static final String USERNAME = "username";
     public static final String PSW = "password";
     public static final String USERID = "userid";
-    public static final String CURRENT_STATE = "currentState";
+//    public static final String CURRENT_STATE = "currentState";
     private static String Sname;
     private EditText TextUsername;
     private EditText TextPassword;
@@ -54,7 +53,7 @@ public class SignInActivity extends Activity{
     private SharedPreferences sp;
     private TextInputLayout userTextInput,passwordTextInput;
     private String Spassword;
-    private String currentState = "000";
+//    private String currentState = "000";
 
     private MyHandler myHandler = new MyHandler(this);
 
@@ -98,7 +97,7 @@ public class SignInActivity extends Activity{
 //        checkBoxRemPSW.setChecked(sp.getBoolean(REM_PSW,false));
         TextUsername.setText(sp.getString(USERNAME, ""));
         TextPassword.setText(sp.getString(PSW,""));
-        currentState = sp.getString(CURRENT_STATE,"000");
+//        currentState = sp.getString(CURRENT_STATE,"000");
     }
 
     @Override
@@ -161,12 +160,8 @@ public class SignInActivity extends Activity{
                         Toast.makeText(activity, "其他错误", Toast.LENGTH_SHORT).show();
                         break;
                     case 0x36:
-                        Intent i;
-                        if(Sname.equals("yh")){
-                            i = new Intent(activity, DeviceScanActivity.class);
-                        }else{
-                            i = new Intent(activity, TasksActivity.class);
-                        }
+                        Intent i = new Intent(activity, TasksActivity.class);
+
                         activity.startActivity(i);
                         activity.finish();
                         break;
@@ -238,7 +233,7 @@ public class SignInActivity extends Activity{
                         CurrentUser user = CurrentUser.getOnlyUser();
                         user.setUsername(Sname);
                         user.setUserId(json);
-                        user.setCurrentState(currentState);
+//                        user.setCurrentState(currentState);
                         SharedPreferences.Editor editor = sp.edit();
 
                         editor.putBoolean(REM_PSW, true);

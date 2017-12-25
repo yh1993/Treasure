@@ -31,7 +31,6 @@ import com.dell.treasure.SignInActivity;
 import com.dell.treasure.dao.Task;
 import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.rank.RegisterActivity;
-import com.dell.treasure.service.NetService;
 import com.dell.treasure.service.PrepareService;
 import com.dell.treasure.service.UserInfo;
 import com.dell.treasure.share.InviteActivity;
@@ -88,9 +87,9 @@ public class TasksActivity extends AppCompatActivity {
         username = userInfo.getUsername();
         mtasksLocalDataSource = TasksLocalDataSource.getInstance();
         mtasksRepository = TasksRepository.getInstance(mtasksLocalDataSource);
+
 //      侧边栏
         initNavigationViewHeader();
-//      toolbar
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         // 标题的文字需在setSupportActionBar之前，不然会无效
         mToolbar.setTitle("校园寻宝");
@@ -230,28 +229,28 @@ public class TasksActivity extends AppCompatActivity {
         }
     }
 
-    private void judgeCurrentState() {
-        Intent intent = new Intent();
-        currentState = userInfo.getCurrentState();
-        switch (currentState){
-            case "001":
-                //招募结束
-                intent.setClass(TasksActivity.this,RegisterActivity.class);
-                startActivity(intent);
-                break;
-            case "002":
-                //任务等待
-            case "004":
-                //任务结束
-            case "003":
-                //任务进行中
-                mTasksPresenter.setFiltering(TasksFilterType.ACTIVE_TASKS);
-                mTasksPresenter.loadTasks(false);
-                break;
-            default:
-                break;
-        }
-    }
+//    private void judgeCurrentState() {
+//        Intent intent = new Intent();
+//        currentState = userInfo.getCurrentState();
+//        switch (currentState){
+//            case "001":
+//                //招募结束
+//                intent.setClass(TasksActivity.this,RegisterActivity.class);
+//                startActivity(intent);
+//                break;
+//            case "002":
+//                //任务等待
+//            case "004":
+//                //任务结束
+//            case "003":
+//                //任务进行中
+//                mTasksPresenter.setFiltering(TasksFilterType.ACTIVE_TASKS);
+//                mTasksPresenter.loadTasks(false);
+//                break;
+//            default:
+//                break;
+//        }
+//    }
 
     private void isFirstSign() {
         if(isFirst){
@@ -479,33 +478,33 @@ public class TasksActivity extends AppCompatActivity {
         }
     }
 
-    private class isSignTask extends AsyncTask<Void, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            Boolean isSign = false;
-            try {
-                isSign = NetUtil.isSignPeriod();
-            } catch (SoapFault soapFault) {
-                soapFault.printStackTrace();
-            }
-            if(!isSign){
-                currentState = "001";
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            if(currentState.equals("000")){
-                //招募阶段
-                Intent intent = new Intent(TasksActivity.this, InviteActivity.class);
-                startActivity(intent);
-            }
-        }
-    }
+//    private class isSignTask extends AsyncTask<Void, Void, String> {
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//        }
+//
+//        @Override
+//        protected String doInBackground(Void... params) {
+//            Boolean isSign = false;
+//            try {
+//                isSign = NetUtil.isSignPeriod();
+//            } catch (SoapFault soapFault) {
+//                soapFault.printStackTrace();
+//            }
+//            if(!isSign){
+//                currentState = "001";
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String s) {
+//            if(currentState.equals("000")){
+//                //招募阶段
+//                Intent intent = new Intent(TasksActivity.this, InviteActivity.class);
+//                startActivity(intent);
+//            }
+//        }
+//    }
 }
