@@ -133,6 +133,17 @@ public class ToolUtil {
         return date;
     }
 
+    public static Date stringToDate1(String s){
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        Date date = null;
+        try {
+            date = sd.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
     public static void setAlarm(Context context, long triggerAtMillis, int matchId, Intent intent){
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getService(context,matchId,intent,PendingIntent.FLAG_UPDATE_CURRENT);

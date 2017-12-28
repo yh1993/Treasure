@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.dell.treasure.dao.Task;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -67,6 +68,7 @@ public class TasksRepository implements TasksDataSource {
     public static TasksRepository getInstance(TasksDataSource tasksLocalDataSource) {
         if (INSTANCE == null) {
             INSTANCE = new TasksRepository(tasksLocalDataSource);
+            INSTANCE.refreshCache(tasksLocalDataSource.init());
         }
         return INSTANCE;
     }
@@ -74,6 +76,12 @@ public class TasksRepository implements TasksDataSource {
 
     public static void destroyInstance() {
         INSTANCE = null;
+    }
+
+    @Override
+    public List<Task> init() {
+        refreshCache(mTasksLocalDataSource.init());
+        return null;
     }
 
     /**
@@ -116,7 +124,10 @@ public class TasksRepository implements TasksDataSource {
         if (mCachedTasks == null) {
             mCachedTasks = new LinkedHashMap<>();
         }
-        mCachedTasks.put(task.getId(), task);
+        Task task1 = new Task();
+        task1.setTask(task);
+        mCachedTasks.put(task.getId(), task1);
+
     }
 
     @Override
@@ -124,18 +135,48 @@ public class TasksRepository implements TasksDataSource {
 
         mTasksLocalDataSource.completeTask(task);
 
-        task.setFlag(2);
-
         // Do in memory cache update to keep the app UI up to date
         if (mCachedTasks == null) {
             mCachedTasks = new LinkedHashMap<>();
         }
-        mCachedTasks.put(task.getId(), task);
+        Task task1 = new Task();
+        task1.setTask(task);
+        mCachedTasks.put(task.getId(), task1);
+        for(Task task2: mCachedTasks.values()){
+            Logger.d(" task: "+task2.toString());
+        }
     }
 
     @Override
-        public void completeTask(@NonNull Long taskId) {
-        completeTask(getTaskWithId(taskId));
+    public void completeTask(@NonNull Long Id) {
+        completeTask(getTaskWithId(Id));
+    }
+
+    @Override
+    public void updateTask(@NonNull Task task) {
+        mTasksLocalDataSource.updateTask(task);
+        if (mCachedTasks == null) {
+            mCachedTasks = new LinkedHashMap<>();
+        }
+        Task task1 = new Task();
+        task1.setTask(task);
+        mCachedTasks.put(task.getId(), task1);
+    }
+
+    @Override
+    public boolean isTaskExist(@NonNull String taskId) {
+        if (mCachedTasks == null) {
+            mCachedTasks = new LinkedHashMap<>();
+            return mTasksLocalDataSource.isTaskExist(taskId);
+        }else {
+            ArrayList<Task> arrayList = new ArrayList<>(mCachedTasks.values());
+            for(Task task1:arrayList){
+                if(task1.getTaskId().equals(taskId)){
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 //    @Override
@@ -185,9 +226,9 @@ public class TasksRepository implements TasksDataSource {
      * get the data.
      */
     @Override
-    public void getTask(@NonNull final Long taskId, @NonNull final GetTaskCallback callback) {
+    public void getTask(@NonNull final Long Id, @NonNull final GetTaskCallback callback) {
 
-        Task cachedTask = getTaskWithId(taskId);
+        Task cachedTask = getTaskWithId(Id);
 
         // Respond immediately with cache if available
         if (cachedTask != null) {
@@ -198,7 +239,7 @@ public class TasksRepository implements TasksDataSource {
         // Load from server/persisted if needed.
 
         // Is the task in the local data source? If not, query the network.
-        mTasksLocalDataSource.getTask(taskId, new GetTaskCallback() {
+        mTasksLocalDataSource.getTask(Id, new GetTaskCallback() {
             @Override
             public void onTaskLoaded(Task task) {
                 // Do in memory cache update to keep the app UI up to date
@@ -213,6 +254,11 @@ public class TasksRepository implements TasksDataSource {
             public void onDataNotAvailable() {
             }
         });
+    }
+
+    @Override
+    public Task getTask(String taskId) {
+        return mTasksLocalDataSource.getTask(taskId);
     }
 
     @Override

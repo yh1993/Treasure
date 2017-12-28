@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
+import com.dell.treasure.dao.Task;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
@@ -21,24 +22,51 @@ import org.ksoap2.SoapFault;
  * Created by DELL on 2016/6/7.
  */
 public class Location extends Service {
+   private final Handler msgHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0x34:
+                    Toast.makeText(getApplicationContext(), "恭喜，您已经发现宝物，任务结束会统一发放奖励。", Toast.LENGTH_SHORT).show();
+                    ScannerService.isFirst = 1;
+                    break;
+                case 0x35:
+                    Toast.makeText(getApplicationContext(), "其他人已经发现宝物，任务结束会统一发放奖励。", Toast.LENGTH_SHORT).show();
+                    ScannerService.isFirst = 1;
+                    break;
+                case 0x36:
+//                    Toast.makeText(getApplicationContext(), "其他情况！", Toast.LENGTH_SHORT).show();
+                    ScannerService.isFirst = 1;
+                    break;
+                case 0x38:
+                    Toast.makeText(getApplicationContext(), "无法连接服务器，请确认网络状况。", Toast.LENGTH_SHORT).show();
+                    ScannerService.isFirst = 2;
+                    break;
+                default:
+                    break;
+            }
+            stopSelf();
+        }
+    };
     private String username;
     private String taskId;
     private String bleId;
     private String location;
     private String lat;
     private String lon;
-
     private LocationService locationService;
     private BDLocationListener listener = new MyLocationListener();
+
     @Override
     public void onCreate() {
         super.onCreate();
         Logger.d("Location: onCreate");
         MyApp myApp = MyApp.getInstance();
         CurrentUser user = CurrentUser.getOnlyUser();
+        Task currenTask = user.getCurrentTask();
         username = user.getUsername();
-        bleId = user.getTarget_ble();
-        taskId = user.getTaskId();
+        bleId = currenTask.getTargetBle();
+        taskId = currenTask.getTaskId();
 
         locationService = myApp.locationService;
         locationService.setLocationOption(locationService.getDefaultLocationClientOption());
@@ -122,31 +150,4 @@ public class Location extends Service {
             }
         }
     }
-
-   private final Handler msgHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 0x34:
-                    Toast.makeText(getApplicationContext(), "恭喜，您已经发现宝物，任务结束会统一发放奖励。", Toast.LENGTH_SHORT).show();
-                    ScannerService.isFirst = 1;
-                    break;
-                case 0x35:
-                    Toast.makeText(getApplicationContext(), "其他人已经发现宝物，任务结束会统一发放奖励。", Toast.LENGTH_SHORT).show();
-                    ScannerService.isFirst = 1;
-                    break;
-                case 0x36:
-//                    Toast.makeText(getApplicationContext(), "其他情况！", Toast.LENGTH_SHORT).show();
-                    ScannerService.isFirst = 1;
-                    break;
-                case 0x38:
-                    Toast.makeText(getApplicationContext(), "无法连接服务器，请确认网络状况。", Toast.LENGTH_SHORT).show();
-                    ScannerService.isFirst = 2;
-                    break;
-                default:
-                    break;
-            }
-            stopSelf();
-        }
-    };
 }

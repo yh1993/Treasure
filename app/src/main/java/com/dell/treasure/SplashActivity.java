@@ -24,6 +24,7 @@ public class SplashActivity extends Activity{
     private CurrentUser user;
     private String username = null;
     private String userid = null;
+    private String taskid = null;
 //    private String currentState = "000";
 
     @Override
@@ -37,6 +38,7 @@ public class SplashActivity extends Activity{
         sp = getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
         username = sp.getString(SignInActivity.USERNAME, null);
         userid = sp.getString(SignInActivity.USERID,null);
+        taskid = sp.getString("taskId",null);
 //        currentState = sp.getString(SignInActivity.CURRENT_STATE,"000");
 
         int SPLASH_DISPLAY_LENGTH = 1000;
@@ -48,6 +50,7 @@ public class SplashActivity extends Activity{
                     user = CurrentUser.getOnlyUser();
                     user.setUsername(username);
                     user.setUserId(userid);
+                    user.setTaskId(taskid);
 //                    user.setCurrentState(currentState);
 
 //                    if(getIntent().getStringExtra("tasKind") != null){

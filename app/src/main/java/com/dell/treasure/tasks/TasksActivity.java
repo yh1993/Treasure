@@ -31,7 +31,9 @@ import com.dell.treasure.SignInActivity;
 import com.dell.treasure.dao.Task;
 import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.rank.RegisterActivity;
+import com.dell.treasure.service.AdvertiserService;
 import com.dell.treasure.service.PrepareService;
+import com.dell.treasure.service.ScannerService;
 import com.dell.treasure.service.UserInfo;
 import com.dell.treasure.share.InviteActivity;
 import com.dell.treasure.source.TasksRepository;
@@ -46,14 +48,18 @@ import com.orhanobut.logger.Logger;
 import org.greenrobot.greendao.query.Query;
 import org.ksoap2.SoapFault;
 
+import java.util.Date;
 import java.util.List;
+
+import static com.dell.treasure.support.TaskRelated.endTask;
+import static com.dell.treasure.support.TaskRelated.isOverdue;
+import static com.dell.treasure.support.ToolUtil.dateToString;
 
 
 public class TasksActivity extends AppCompatActivity {
     public static final String TAG = "TasksActivity";
     private static final String CURRENT_FILTERING_KEY = "CURRENT_FILTERING_KEY";
     private MyApp myApp;
-    private String username;
     private DrawerLayout mDrawerLayout;
     private TextView points;
     private TextView money;
@@ -62,8 +68,6 @@ public class TasksActivity extends AppCompatActivity {
     private TaskInfoReceiver taskInfoReceiver;
     private LocalBroadcastManager broadcastManager;
     private NavigationView navigationView;
-    private Fragment currentFragment;
-    private int currentIndex;
     private Boolean isFirst;
     private SharedPreferences sp;
     private TasksPresenter mTasksPresenter;
@@ -71,19 +75,21 @@ public class TasksActivity extends AppCompatActivity {
     private TasksRepository mtasksRepository;
 
     private CurrentUser userInfo;
-    private String currentState;
+    private Task currentTask;
+//    private String currentState;
+    private String taskId;
+    private String username;
     private String taskTmp;
     private String fromUserIdTmp;
-    private Task task;
-    private TaskDao taskDao;
+    private int isCurrFlag;  //  0 没有任务  1 有任务  2 有任务，且正在执行
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tasks_act);
-
         myApp = (MyApp)getApplication();
         userInfo= CurrentUser.getOnlyUser();
+        currentTask = userInfo.getCurrentTask();
         username = userInfo.getUsername();
         mtasksLocalDataSource = TasksLocalDataSource.getInstance();
         mtasksRepository = TasksRepository.getInstance(mtasksLocalDataSource);
@@ -116,7 +122,7 @@ public class TasksActivity extends AppCompatActivity {
         broadcastManager.registerReceiver(userInfoReceiver, intentFilter);
         broadcastManager.registerReceiver(taskInfoReceiver, taskFilter);
 
-        currentState = userInfo.getCurrentState();
+//        currentState = userInfo.getCurrentState();
 //        if(currentState.equals("000")||currentState.equals("005")){
 //            new isSignTask().execute();
 //        }
@@ -147,17 +153,15 @@ public class TasksActivity extends AppCompatActivity {
                     (TasksFilterType) savedInstanceState.getSerializable(CURRENT_FILTERING_KEY);
             mTasksPresenter.setFiltering(currentFiltering);
         }
-//        currentFragment = new FristFragment();
-//        switchContent(currentFragment);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        Logger.d("2");
         if(mTasksPresenter != null){
+            Logger.d("2.1");
             mTasksPresenter.start();
-//            mTasksPresenter.loadTasks(true);
-
         }
 
     }
@@ -165,8 +169,7 @@ public class TasksActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        调试设置,记得注销
-        userInfo.setCurrentState("003");
+        Logger.d("3");
         isFirst = sp.getBoolean("FIRST", true);
         String points1 = sp.getString("points", "");
         String money1 = sp.getString("money", "");
@@ -178,56 +181,147 @@ public class TasksActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, 1);
         }
         isFirstSign();
+        initCurrenTask();
+        isReceiveTaskFromUser();
+
 //        if(!userInfo.getTasKind().equals("0")){
 //            startService(new Intent(TasksActivity.this,NetService.class));
 //        }
 //        judgeCurrentState();
-        isReceiveTaskFromUser();
-        mTasksPresenter.loadTasks(true);
+
+//        mTasksPresenter.loadTasks(true);
     }
 
+    public void initCurrenTask(){
+        taskId = userInfo.getTaskId();
+        if(taskId != null){
+            //有任务
+            if(mtasksRepository.isTaskExist(taskId)) {
+                currentTask.setTask(mtasksRepository.getTask(taskId));
+                if(isOverdue(currentTask.getStartTime())){
+                    //任务过期
+                    endTask(TasksActivity.this,userInfo);
+                    isCurrFlag = 0;
+                }else {
+                    //有任务
+                    if(currentTask.getFlag() == -2){
+                        isCurrFlag = 1;
+                    }else{
+                        //正在执行
+                        isCurrFlag = 2;
+                        initData();
+                    }
+                }
+            }
+        }else{
+            //当前没接收到任务
+            isCurrFlag = 0;
+        }
+    }
+    void initData(){
+        Logger.d("4");
+        if(!ScannerService.running){
+            restartDialog(currentTask.getFlag());
+        }
+    }
+
+    //提示
+    private void restartDialog(final int flag) {
+        new getRecordTimeDis().execute();
+        Intent startScanService = new Intent(this, ScannerService.class);
+        startService(startScanService);
+        Intent startAdvService = new Intent(this, AdvertiserService.class);
+        if(flag == 0){
+            startService(startAdvService);
+        }
+//        new AlertDialog.Builder(context)
+//                .setTitle("提示")
+//                .setMessage("您上次任务未结束，是否继续参与？")
+//                .setIcon(android.R.drawable.ic_dialog_info)
+//                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        Intent startScanService = new Intent(context, ScannerService.class);
+//                        context.startService(startScanService);
+//                        Intent startAdvService = new Intent(context, AdvertiserService.class);
+//                        if(flag == 0){
+//                            context.startService(startAdvService);
+//                        }
+//
+//                    }
+//                })
+//                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        task.setFlag(-2);
+//                        taskDao.update(task);
+//                        refresh();
+//                        dialog.dismiss();
+//                    }
+//                })
+//                .show();
+    }
+
+
+
     private void isReceiveTaskFromUser() {
-        taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
-        task = Task.getInstance();
         taskTmp = userInfo.getTaskIdTmp();
         fromUserIdTmp = userInfo.getFromUserId();
-        Log.d("result",TAG + " isReceiveTaskFromUser: "+taskTmp+" "+fromUserIdTmp);
+        Logger.d("isReceiveTaskFromUser: "+taskTmp+" "+fromUserIdTmp);
         if(taskTmp != ""&& taskTmp != null){
-            Log.d("result",TAG + " isReceiveTaskFromUser: received task from user");
-            Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(taskTmp)).build();
-            List<Task> tasks = taskQuery.list();
-            if (tasks.size() > 0) {
-                task.setTask(tasks.get(0));
-                taskTODO();
-            }else {
-                //查询任务；
-                new getTaskInfo().execute();
+            // 收到分享
+            if(isCurrFlag == 2){
+                Logger.d("不接受分享");
+                String dialog = "你好，当前正在参与任务。。。";
+                PopupDialog(dialog);
+            }else if(isCurrFlag == 1){
+                Logger.d("从本地获取详细信息");
+                if(taskTmp == currentTask.getTaskId()){
+                    currentTask.setLastId(fromUserIdTmp);
+                    startActivity(new Intent(this,TaskDetails.class));
+                }else {
+                    String dialog = "你好，该任务已过期。。。";
+                    PopupDialog(dialog);
+                }
+            }else if(isCurrFlag == 0){
+                Logger.d("从服务端获取详细信息");
+                getShareInfo();
             }
         }
         userInfo.setTaskIdTmp(null);
         userInfo.setFromUserId(null);
     }
 
-    void taskTODO(){
-        if(task.getFlag() >= -1){
-            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TasksActivity.this);
-            alertDialogBuilder.setTitle("提示");
-            alertDialogBuilder.setMessage("你好，你已经参与了该任务。。。");
-            alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.cancel();
-                }
-            });
-            alertDialogBuilder.create().show();
+    private void getShareInfo(){
+        if (mtasksRepository.isTaskExist(taskTmp)) {
+            currentTask.setTask(mtasksRepository.getTask(taskTmp));
+            if(isOverdue(currentTask.getStartTime())){
+                currentTask.setTask(new Task());
+                String dialog = "你好，该任务已过期。。。";
+                PopupDialog(dialog);
+            }else {
+                currentTask.setLastId(fromUserIdTmp);
+                startActivity(new Intent(this,TaskDetails.class));
+            }
         }else {
-            userInfo.setLastId(fromUserIdTmp);
-            task.setLastId(fromUserIdTmp);
-            taskDao.update(task);
-            Log.d("result",TAG + " taskTODO: "+task.getLastId());
-            startActivity(new Intent(this,TaskDetails.class));
+            //查询任务；
+            new getTaskInfo().execute();
         }
     }
+
+    private void PopupDialog(String dialog){
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TasksActivity.this);
+        alertDialogBuilder.setTitle("提示");
+        alertDialogBuilder.setMessage(dialog);
+        alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        alertDialogBuilder.create().show();
+    }
+
 
 //    private void judgeCurrentState() {
 //        Intent intent = new Intent();
@@ -426,8 +520,16 @@ public class TasksActivity extends AppCompatActivity {
             Boolean isEnd = intent.getBooleanExtra("isEnd",false);
             if(mTasksPresenter != null){
 //            mTasksPresenter.start();
-               mTasksPresenter.loadTasks(true);
-                Logger.d("收到 ");
+                if(currentTask.getTaskId()!= null && currentTask.getFlag() <2) {
+                    currentTask.setFlag(2);
+                    mtasksRepository.completeTask(currentTask);
+                }
+                userInfo.setTaskId(null);
+                userInfo.currentTaskClear();
+//                currentTask = userInfo.getCurrentTask();
+
+//                mtasksRepository.init();
+                mTasksPresenter.loadTasks(false);
             }
         }
     }
@@ -453,27 +555,61 @@ public class TasksActivity extends AppCompatActivity {
             String money = split[2];
             String needNum = split[3];
 
-            Log.d("result",TAG + bleId +" "+date+" "+money+" "+needNum);
-            userInfo.setLastId(fromUserIdTmp);
-            userInfo.setStartTime(date);
-            userInfo.setTarget_ble(bleId);
-            userInfo.setTaskId(taskTmp);
-            userInfo.setNeedNum(needNum);
-
-            SharedPreferences tasknum = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = tasknum.edit();
-            editor.putString("startTime",date);  //任务开始时间
-            editor.putString("money",money);
-            editor.putString("needNum",needNum);
-            editor.apply();
-
+            currentTask.setTask(new Task(null,fromUserIdTmp,taskTmp,bleId,date,null,0.0,"0",needNum,"0","0",money,-2));
             return null;
         }
 
         @Override
         protected void onPostExecute(String s) {
-            Intent intent = new Intent(TasksActivity.this,PrepareService.class);
-            TasksActivity.this.startService(intent);
+            if(isOverdue(currentTask.getStartTime())){
+                currentTask.setTask(new Task());
+                String dialog = "你好，该任务已过期。。。";
+                PopupDialog(dialog);
+            }else {
+                mtasksRepository.saveTask(currentTask);
+                Intent intent = new Intent(TasksActivity.this,TaskDetails.class);
+                TasksActivity.this.startActivity(intent);
+                Logger.d("执行顺序 4 "+currentTask.toString());
+            }
+        }
+    }
+
+    private class getRecordTimeDis extends AsyncTask<Void, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String json = null;
+            String time = "0";
+            String distance = "0";
+            try {
+                json = NetUtil.getRecordTimeDis(currentTask.getTaskId(),userInfo.getUserId());
+            } catch (SoapFault | NullPointerException soapFault) {
+                soapFault.printStackTrace();
+            }
+
+            if(json.equals("0")){
+
+            }else {
+                //获取消息
+                String[] split = json.split(";");
+                time = split[0];
+                distance = split[1];
+
+
+                currentTask.setLength(Double.parseDouble(time));
+                currentTask.setDistance(distance);
+                currentTask.setBeginTime(dateToString(new Date()));
+
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
 
         }
     }

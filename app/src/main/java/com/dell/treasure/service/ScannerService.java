@@ -39,24 +39,22 @@ public class ScannerService extends Service {
     public static boolean running = false;
     public static int isFirst = 0;      //0 首次上报  1 不需要再次上报  2需要再次上报
     public CurrentUser user;
+    private Task currenTask;
     private DeviceLiveThread deviceLiveThread;  //循环扫描线程
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
 
     private String bleId;
-    private Task task;
-    private Boolean isJoin;
 
     @Override
     public void onCreate() {
         running = true;
         user = CurrentUser.getOnlyUser();
-        bleId = user.getTarget_ble();
-        task = Task.getInstance();
-        isJoin = user.isJoin();
+        currenTask = user.getCurrentTask();
+        bleId = currenTask.getTargetBle();
+
         initialize();
-        if(task.getFlag() == 0 || task.getFlag() == -1){
-            StartTask.init();
+        if(currenTask.getFlag() == 0 || currenTask.getFlag() == -1){
             StartTask.startTask(this);
         }
         super.onCreate();
@@ -79,7 +77,8 @@ public class ScannerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(task.getFlag() == 0 || task.getFlag() == -1){
+        if(currenTask.getFlag() == 0 || currenTask.getFlag() == -1){
+            Logger.d("task over 3" );
             StartTask.endTask(this);
         }
         running = false;
@@ -123,7 +122,7 @@ public class ScannerService extends Service {
 
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        builder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
         return builder.build();
     }
 
@@ -145,7 +144,7 @@ public class ScannerService extends Service {
             String address = result.getDevice().getAddress();
 //            获取广播数据包
 //            if(!user.isNetConn()){
-            if(!user.isJoin()){
+            if(currenTask.getFlag() == -2){
                 try {
                     ScanRecord scanRecord = result.getScanRecord();
                     final byte[] bytes = scanRecord.getManufacturerSpecificData(1);
@@ -153,10 +152,10 @@ public class ScannerService extends Service {
 //                        只上报上线
                         String lastId = Arrays.toString(bytes);
                         Logger.d("从上线接收到消息 ：" + lastId);
-                        user.setLastId(lastId);
+                        currenTask.setLastId(lastId);
 //                        user.setNetConn(true);
 
-                        AppSurvice.isSurvive(getApplicationContext());
+//                        AppSurvice.isSurvive(getApplicationContext());
                         stopSelf();
 //                        Intent passiveIntent = new Intent(getApplicationContext(), TasksActivity.class);
 //                        passiveIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

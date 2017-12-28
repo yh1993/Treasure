@@ -33,6 +33,36 @@ import java.util.List;
  */
 public interface TasksDataSource {
 
+    List<Task> init();
+
+    void getTasks(@NonNull LoadTasksCallback callback);
+
+    void getTask(@NonNull Long Id, @NonNull GetTaskCallback callback);
+
+    Task getTask(String taskId);
+
+    void saveTask(@NonNull Task task);
+
+    void completeTask(@NonNull Task task);
+
+    void completeTask(@NonNull Long Id);
+
+    void updateTask(@NonNull Task task);
+
+    boolean isTaskExist(@NonNull String taskId);
+
+//    void activateTask(@NonNull Task task);
+
+//    void activateTask(@NonNull String taskId);
+
+    void clearCompletedTasks();
+
+    void refreshTasks();
+
+    void deleteAllTasks();
+
+    void deleteTask(@NonNull Long taskId);
+
     interface LoadTasksCallback {
 
         void onTasksLoaded(List<Task> tasks);
@@ -46,26 +76,4 @@ public interface TasksDataSource {
 
         void onDataNotAvailable();
     }
-
-    void getTasks(@NonNull LoadTasksCallback callback);
-
-    void getTask(@NonNull Long taskId, @NonNull GetTaskCallback callback);
-
-    void saveTask(@NonNull Task task);
-
-    void completeTask(@NonNull Task task);
-
-    void completeTask(@NonNull Long taskId);
-
-//    void activateTask(@NonNull Task task);
-
-//    void activateTask(@NonNull String taskId);
-
-    void clearCompletedTasks();
-
-    void refreshTasks();
-
-    void deleteAllTasks();
-
-    void deleteTask(@NonNull Long taskId);
 }

@@ -53,6 +53,7 @@ public class SignInActivity extends Activity{
     private SharedPreferences sp;
     private TextInputLayout userTextInput,passwordTextInput;
     private String Spassword;
+    private String taskId;
 //    private String currentState = "000";
 
     private MyHandler myHandler = new MyHandler(this);
@@ -97,6 +98,7 @@ public class SignInActivity extends Activity{
 //        checkBoxRemPSW.setChecked(sp.getBoolean(REM_PSW,false));
         TextUsername.setText(sp.getString(USERNAME, ""));
         TextPassword.setText(sp.getString(PSW,""));
+        taskId = sp.getString("taskId",null);
 //        currentState = sp.getString(CURRENT_STATE,"000");
     }
 
@@ -233,6 +235,7 @@ public class SignInActivity extends Activity{
                         CurrentUser user = CurrentUser.getOnlyUser();
                         user.setUsername(Sname);
                         user.setUserId(json);
+                        user.setTaskId(taskId);
 //                        user.setCurrentState(currentState);
                         SharedPreferences.Editor editor = sp.edit();
 

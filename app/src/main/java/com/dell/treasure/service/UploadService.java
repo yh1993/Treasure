@@ -10,27 +10,26 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.baidu.trace.OnTrackListener;
-import com.dell.treasure.dao.DaoSession;
 import com.dell.treasure.dao.Task;
-import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
 import com.orhanobut.logger.Logger;
 
-import org.greenrobot.greendao.query.Query;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ksoap2.SoapFault;
 
 import java.text.DecimalFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.dell.treasure.support.TaskRelated.endTask;
+import static com.dell.treasure.support.TaskRelated.isOverdue;
 import static com.dell.treasure.support.ToolUtil.stringToDate;
+import static com.dell.treasure.support.ToolUtil.stringToDate1;
 
 /**
  * Created by yh on 2017/11/26.
@@ -44,43 +43,31 @@ public class UploadService extends Service {
     protected static OnTrackListener trackListener = null;
     private MyApp myApp;
     private CurrentUser user;
+    private Task currenTask;
     private String userId;
     private String lastId;
     private String taskId;
     private String beginTime;
-    private String endTime;
+    private String startTime;
     private double timeLong;
+    private double lastDis;
+    private double lastTime;
+    private String distanceLong;
     private String way;
     private String isFound;
     private SharedPreferences sp;
-    private TaskDao taskDao;
-    private Query<Task> taskQuery;
-    private List<Task> tasks;
-    private Task task;
-    private long ownTime;
-    private long sysTime;
+
+    private long begin;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("result", TAG +" onCreate");
         myApp = (MyApp) getApplication();
         user = CurrentUser.getOnlyUser();
-
+        currenTask = user.getCurrentTask();
+        Logger.d("task over 5" + currenTask.toString());
         initOnTrackListener();
-
-        DaoSession daoSession = myApp.getDaoSession();
-        taskDao = daoSession.getTaskDao();
-        task = Task.getInstance();
-        taskQuery = taskDao.queryBuilder().whereOr(TaskDao.Properties.Flag.eq(-1),TaskDao.Properties.Flag.eq(0)).build();
-        tasks = taskQuery.list();
         sp = UploadService.this.getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
-        if(tasks.size() > 0) {
-            task.setTask(tasks.get(0));
-        }else{
-            stopSelf();
-        }
-
     }
 
     @Override
@@ -92,25 +79,39 @@ public class UploadService extends Service {
         }
 
         userId = user.getUserId();
-        lastId = task.getLastId();
-        taskId = task.getTaskId();
-        beginTime = task.getBeginTime();
-        endTime = task.getEndTime();
+        lastId = currenTask.getLastId();
+        taskId = currenTask.getTaskId();
+        beginTime = currenTask.getBeginTime();
+        startTime = currenTask.getStartTime();
+
+        if(userId == null || lastId == null || taskId == null ||beginTime == null || startTime == null){
+            stopSelf();
+        }
+
         if(Objects.equals(lastId, "0")){
             way = "1";
         }else{
             way = "2";
         }
 
-        ownTime = stringToDate(endTime).getTime();
-        Logger.d(endTime + " "+stringToDate(endTime) );
+        long end = new Date().getTime();
+        isOverTime();
 
-        long start = stringToDate(beginTime).getTime();
-        queryDistance(start,ownTime);
-        timeLong = (ownTime- start) / 1000.0 / 60.0;
+        begin = stringToDate1(beginTime).getTime();
+        queryDistance(begin,end);
+        timeLong = (end- begin) / 1000.0 / 60.0;
+        lastDis = Double.parseDouble(currenTask.getDistance());
+        lastTime = currenTask.getLength();
 //            new GetTimeTask().execute();
         Log.d("result",TAG + timeLong);
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    public void isOverTime(){
+        if(isOverdue(startTime)){
+            endTask(UploadService.this,user);
+            stopSelf();
+        }
     }
 
     @Nullable
@@ -146,9 +147,9 @@ public class UploadService extends Service {
 //                    ownTime = sysTime;
 //                }
 //            }
-//            long start = stringToDate(beginTime).getTime();
-//            queryDistance(start,ownTime);
-//            timeLong = (ownTime- start) / 1000.0 / 60.0;
+//            long begin = stringToDate(beginTime).getTime();
+//            queryDistance(begin,ownTime);
+//            timeLong = (ownTime- begin) / 1000.0 / 60.0;
 //            return null;
 //        }
 //
@@ -161,6 +162,7 @@ public class UploadService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Logger.d("task over 6" + currenTask.toString());
     }
 
     // 查询里程
@@ -203,10 +205,8 @@ public class UploadService extends Service {
                     JSONObject dataJson = new JSONObject(arg0);
                     if (null != dataJson && dataJson.has("status") && dataJson.getInt("status") == 0) {
                         double distance = dataJson.getDouble("distance") / 1000;
-                        double lastDis = Double.parseDouble(user.getLastDistance());
                         DecimalFormat df = new DecimalFormat("#.0");
-                        user.setDistance(df.format(distance+lastDis));  //千米
-                        Logger.d(distance+" "+user.getLastDistance()+" "+ user.getDistance()+" km");
+                        distanceLong = df.format(distance+lastDis);  //千米
                     }
                     // TODO Auto-generated catch block
                 } catch (JSONException e) {
@@ -230,11 +230,8 @@ public class UploadService extends Service {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            endTime = task.getEndTime();
-            ownTime = stringToDate(endTime).getTime();
-            long start = stringToDate(beginTime).getTime();
-            double lastTime = Double.parseDouble(user.getLastTime());
-            timeLong = (ownTime- start) / 1000.0 / 60.0 + lastTime;
+            long end = new Date().getTime();
+            timeLong = (end- begin) / 1000.0 / 60.0 + lastTime;
         }
 
         protected String doInBackground(String... args) {
@@ -242,8 +239,8 @@ public class UploadService extends Service {
             DecimalFormat df = new DecimalFormat("#.0");
             String json = null;
             try {
-                json = NetUtil.RecordParti(userId, taskId, df.format(timeLong), user.getDistance(), way, lastId,isFound);
-                Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+timeLong+" "+user.getDistance()+" "+json);
+                json = NetUtil.RecordParti(userId, taskId, df.format(timeLong), distanceLong, way, lastId,isFound);
+                Logger.d("5、上报参与信息 canyu "+userId+" "+taskId+" "+lastId+" "+way+" "+timeLong+" "+df.format(timeLong)+" "+json);
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();
             }

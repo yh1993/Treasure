@@ -17,24 +17,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dell.treasure.R;
+import com.dell.treasure.SignInActivity;
 import com.dell.treasure.dao.Task;
-import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.service.AdvertiserService;
 import com.dell.treasure.service.ScannerService;
 import com.dell.treasure.share.ShareableActivity;
+import com.dell.treasure.source.TasksRepository;
+import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
-import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
 import com.dell.treasure.support.NotificationHelper;
 import com.orhanobut.logger.Logger;
 
-import org.greenrobot.greendao.query.Query;
 import org.ksoap2.SoapFault;
 
-import java.util.List;
+import java.util.Date;
 
 import static com.dell.treasure.support.NotificationHelper.NOTICE_ID;
+import static com.dell.treasure.support.ToolUtil.dateToString;
 
 /**
  * Created by DELL on 2017/7/12.
@@ -47,15 +48,12 @@ import static com.dell.treasure.support.NotificationHelper.NOTICE_ID;
 public class TaskDetails extends ShareableActivity implements View.OnClickListener{
     private static final String TAG = "TaskDetails";
     private CurrentUser user;
+    private Task currenTask;
     private Button game_yes;
     private Button game_no;
     private Intent scanIntent;
-    private Task task;
-    private TaskDao taskDao;
     private String taskId;
-    private String userId;
     private String fromuserId;
-    private String fromuserIdTmp;
     private String level;
     private String num;
     private String strategy = null;
@@ -63,6 +61,10 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
     private TextView level_text;
     private TextView num_text;
     private ProgressDialog pDialog = null;
+
+    private TasksRepository mtasksRepository;
+    private TasksLocalDataSource mtasksLocalDataSource;
+    private SharedPreferences sp;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,53 +72,39 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
         NotificationHelper.clearNotification(this, NOTICE_ID);
 
         user = CurrentUser.getOnlyUser();
-        user.setTasKind("0");
+        currenTask = user.getCurrentTask();
+//        user.setTasKind("0");
+
+        mtasksLocalDataSource = TasksLocalDataSource.getInstance();
+        mtasksRepository = TasksRepository.getInstance(mtasksLocalDataSource);
 
         initView();
-        initData();
-
-        queryData();
-        taskId = task.getTaskId();
-        userId = user.getUserId();
-        fromuserId = task.getLastId();
+        taskId = currenTask.getTaskId();
+        fromuserId = currenTask.getLastId();
+        sp = getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
         new JoinSubmit().execute();
     }
 
-    void initData(){
-        taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
-        task = Task.getInstance();
-    }
-
-    void queryData(){
-        Query<Task> taskQuery = taskDao.queryBuilder().whereOr(TaskDao.Properties.Flag.eq(-3),TaskDao.Properties.Flag.eq(-2)).build();
-        List<Task> tasks = taskQuery.list();
-        if (tasks.size() > 0) {
-            task.setTask(tasks.get(0));
-        }
-    }
-
-    void taskTODO(){
-        if(task.getFlag() >= -1){
-            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TaskDetails.this);
-            alertDialogBuilder.setTitle("提示");
-            alertDialogBuilder.setMessage("你好，你已经参与了该任务。。。");
-            alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    startActivity(new Intent(TaskDetails.this,TasksActivity.class));
-                    dialogInterface.cancel();
-
-                }
-            });
-            alertDialogBuilder.create().show();
-        }else {
-            fromuserId = fromuserIdTmp;
-            user.setLastId(fromuserId);
-            task.setLastId(fromuserId);
-            taskDao.update(task);
-            new JoinSubmit().execute();
-        }
-    }
+//    void taskTODO(){
+//        if(currenTask.getFlag() >= -1){
+//            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TaskDetails.this);
+//            alertDialogBuilder.setTitle("提示");
+//            alertDialogBuilder.setMessage("你好，你已经参与了该任务。。。");
+//            alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    startActivity(new Intent(TaskDetails.this,TasksActivity.class));
+//                    dialogInterface.cancel();
+//
+//                }
+//            });
+//            alertDialogBuilder.create().show();
+//        }else {
+//            fromuserId = fromuserIdTmp;
+//            currenTask.setLastId(fromuserId);
+//            new JoinSubmit().execute();
+//        }
+//    }
 
     void initView(){
         strategy_text = (TextView)findViewById(R.id.strategy_text);
@@ -135,18 +123,19 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.game_no:
-                user.setJoin(false);
                 onBack();
                 break;
             case R.id.game_yes:
-                SharedPreferences sp = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
-                String needNum = sp.getString("needNum", null);
-                Log.d("result","num needNum"+Integer.parseInt(num)+" "+Integer.parseInt(needNum));
-                if(Integer.parseInt(num) < Integer.parseInt(needNum)){
+                String needNum = currenTask.getNeedNum();
+                if(Integer.parseInt(num) <= Integer.parseInt(needNum)){
+                    currenTask.setFlag(-1);
                     joinTask();
-                    user.setJoin(true);
+
                 }else{
+                    currenTask.setFlag(-3);
+                    mtasksRepository.updateTask(currenTask);
                     Toast.makeText(TaskDetails.this,"非常抱歉，本次任务参与人数已达上线，请下次任务早点参与！",Toast.LENGTH_LONG).show();
+                    onBack();
                 }
                 break;
         }
@@ -154,8 +143,11 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
 
     //加入任务
     private void joinTask() {
-        task.setFlag(-1);
-        Logger.d(TAG + " "+task.getId());
+        currenTask.setBeginTime(dateToString(new Date()));
+        user.setTaskId(""+taskId);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString("taskId", taskId);
+        editor.apply();
         new AlertDialog.Builder(TaskDetails.this)
                 .setTitle("提示")
                 .setMessage("是否愿意将任务消息扩散给更多的人？此操作会消耗一些电量，同时您也会得到更多的奖励。")
@@ -163,8 +155,8 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 .setPositiveButton("接受", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        task.setFlag(0);
-                        taskDao.update(task);
+                        currenTask.setFlag(0);
+                        mtasksRepository.updateTask(currenTask);
                         startService(scanIntent);
                         startService(new Intent(TaskDetails.this, AdvertiserService.class));
                         startActivity(new Intent(TaskDetails.this,TasksActivity.class));
@@ -174,8 +166,8 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 .setNegativeButton("放弃", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        taskDao.update(task);
                         startService(scanIntent);
+                        mtasksRepository.updateTask(currenTask);
                         startActivity(new Intent(TaskDetails.this,TasksActivity.class));
                         dialog.dismiss();
                         finish();
@@ -184,20 +176,45 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 .show();
     }
 
+
+
     //拒绝参与任务
     public void onBack() {
-        task.setFlag(-2);
-        taskDao.update(task);
-        startActivity(new Intent(TaskDetails.this,TasksActivity.class));
         if(ScannerService.running){
             stopService(scanIntent);
         }
+        startActivity(new Intent(TaskDetails.this,TasksActivity.class));
         finish();
     }
 
     @Override
     public void onBackPressed() {
-        onBack();
+        new AlertDialog.Builder(TaskDetails.this)
+                .setTitle("提示")
+                .setMessage("确定要退出吗，您还没有选择是否参与当前任务？")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton("参与", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String needNum = currenTask.getNeedNum();
+                        if(Integer.parseInt(num) <= Integer.parseInt(needNum)){
+                            joinTask();
+                            currenTask.setFlag(-1);
+                        }else{
+                            currenTask.setFlag(-3);
+                            Toast.makeText(TaskDetails.this,"非常抱歉，本次任务参与人数已达上线，请下次任务早点参与！",Toast.LENGTH_LONG).show();
+                            onBack();
+                        }
+                        finish();
+                    }
+                })
+                .setNegativeButton("放弃", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onBack();
+                    }
+                })
+                .show();
     }
 
     @Override
@@ -237,16 +254,14 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 String[] split = json.split(",");
                 level = split[0];
                 num = split[1];
-                user.setCurrentLevel(level);
-                user.setCurrentNum(num);
+                currenTask.setCurrentNum(num);
+                currenTask.setCurrentLevel(level);
+
                 SharedPreferences.Editor editor = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE).edit();
-                editor.putString("level", level);
-                editor.putString("num", num);
                 if(strategy != null){
                     editor.putString("strategy",strategy);
                 }
                 editor.apply();
-                Logger.d(TAG +"level num"+ level+" "+num);
             }
             return null;
         }

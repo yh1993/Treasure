@@ -27,7 +27,8 @@ public class SplashActivity2 extends ShareableActivity {
     private CurrentUser user;
     private String username = null;
     private String userid = null;
-    private String currentState = "000";
+    private String taskId = null;
+//    private String currentState = "000";
 
 
     @Override
@@ -42,7 +43,8 @@ public class SplashActivity2 extends ShareableActivity {
         sp = getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
         username = sp.getString(SignInActivity.USERNAME, null);
         userid = sp.getString(SignInActivity.USERID,null);
-        currentState = sp.getString(SignInActivity.CURRENT_STATE,"000");
+        taskId = sp.getString("taskId",null);
+//        currentState = sp.getString(SignInActivity.CURRENT_STATE,"000");
 
         user = CurrentUser.getOnlyUser();
     }
@@ -68,11 +70,12 @@ public class SplashActivity2 extends ShareableActivity {
 
                     user.setUsername(username);
                     user.setUserId(userid);
-                    user.setCurrentState(currentState);
+                    user.setTaskId(taskId);
+//                    user.setCurrentState(currentState);
 
-                    if(getIntent().getStringExtra("tasKind") != null){
-                        user.setTasKind(getIntent().getStringExtra("tasKind"));
-                    }
+//                    if(getIntent().getStringExtra("tasKind") != null){
+//                        user.setTasKind(getIntent().getStringExtra("tasKind"));
+//                    }
                     intent.setClass(SplashActivity2.this, TasksActivity.class);
                 } else {
                     intent.setClass(SplashActivity2.this, SignInActivity.class);

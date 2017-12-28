@@ -43,7 +43,7 @@ public class RegisterActivity extends BaseActivity {
     private ProgressDialog mProgressDialog;
     private int flag = 0;
     private String userName;
-    private SharedPreferences sp;
+//    private SharedPreferences sp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,12 +55,12 @@ public class RegisterActivity extends BaseActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setHasFixedSize(true);
 
-        sp = this.getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
-        CurrentUser.getOnlyUser().setCurrentState("002");
-        SharedPreferences.Editor editor = sp.edit();
+//        sp = this.getSharedPreferences(SignInActivity.USER_INFO, Context.MODE_PRIVATE);
+//        CurrentUser.getOnlyUser().setCurrentState("002");
+//        SharedPreferences.Editor editor = sp.edit();
 
-        editor.putString(SignInActivity.CURRENT_STATE, "002");
-        editor.apply();
+//        editor.putString(SignInActivity.CURRENT_STATE, "002");
+//        editor.apply();
         new getRegisterRankTask().execute();
     }
 

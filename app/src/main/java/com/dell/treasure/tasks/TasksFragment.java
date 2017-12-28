@@ -16,7 +16,9 @@
 
 package com.dell.treasure.tasks;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -54,17 +56,19 @@ import com.dell.treasure.service.ScannerService;
 import com.dell.treasure.support.CommonUtils;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
-import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
 import com.mob.moblink.ActionListener;
 import com.mob.moblink.MobLink;
+import com.orhanobut.logger.Logger;
 
-import org.greenrobot.greendao.query.Query;
 import org.ksoap2.SoapFault;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.dell.treasure.support.ToolUtil.dateToString;
 
 
 public class TasksFragment extends Fragment implements TasksContract.View {
@@ -97,14 +101,12 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     private TextView mNoTaskMainView;
     private LinearLayout mTasksView;
     private TextView mFilteringLabelView;
-    private Task task;
-    private TaskDao taskDao;
+    private Task currenTask;
     private Context context;
     private String mobID;
     private String userId;
     private String taskId;
     private String strategy_text;
-    private String money_text;
     private SharedPreferences sp;
 
     public TasksFragment() {
@@ -119,91 +121,19 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         user = CurrentUser.getOnlyUser();
-        userId = user.getUserId();
+        currenTask = user.getCurrentTask();
         context = getActivity();
         mListAdapter = new TasksAdapter(new ArrayList<Task>(0), mItemListener,TasksFilterType.ACTIVE_TASKS);
 //        mListAdapter = new TasksAdapter(new ArrayList<Task>(0));
         sp = getActivity().getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
-        initData();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Logger.d("5");
         mPresenter.start();
-    }
-
-
-    private void isRestartService() {
-        Intent startScanService = new Intent(context, ScannerService.class);
-        switch (task.getFlag()){
-            case -3:
-            case -2:
-//                user.setNetConn(false);
-                user.setJoin(false);
-                context.startService(startScanService);
-                break;
-            case 0:
-            case -1:
-                user.setJoin(true);
-//                user.setNetConn(true);
-                restartDialog(task.getFlag());
-                break;
-            default:
-                break;
-        }
-    }
-
-    void initData(){
-        taskDao = MyApp.getInstance().getDaoSession().getTaskDao();
-        task = Task.getInstance();
-
-        Query<Task> taskQuery = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-3),TaskDao.Properties.Flag.le(0)).build();
-        List<Task> tasks = taskQuery.list();
-        if (tasks.size() > 0) {
-            task.setTask(tasks.get(tasks.size()-1));
-            Log.d("result",TAG +"taskID: "+task.getTaskId());
-            if(!ScannerService.running){
-                isRestartService();
-            }
-        }
-    }
-
-//提示
-    private void restartDialog(final int flag) {
-        new getRecordTimeDis().execute();
-        Intent startScanService = new Intent(context, ScannerService.class);
-        context.startService(startScanService);
-        Intent startAdvService = new Intent(context, AdvertiserService.class);
-        if(flag == 0){
-            context.startService(startAdvService);
-        }
-//        new AlertDialog.Builder(context)
-//                .setTitle("提示")
-//                .setMessage("您上次任务未结束，是否继续参与？")
-//                .setIcon(android.R.drawable.ic_dialog_info)
-//                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        Intent startScanService = new Intent(context, ScannerService.class);
-//                        context.startService(startScanService);
-//                        Intent startAdvService = new Intent(context, AdvertiserService.class);
-//                        if(flag == 0){
-//                            context.startService(startAdvService);
-//                        }
-//
-//                    }
-//                })
-//                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        task.setFlag(-2);
-//                        taskDao.update(task);
-//                        refresh();
-//                        dialog.dismiss();
-//                    }
-//                })
-//                .show();
     }
 
 //    @Override
@@ -261,7 +191,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mPresenter.loadTasks(true);
+                mPresenter.loadTasks(false);
             }
         });
 
@@ -287,7 +217,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     }
 
     private void refresh(){
-        mPresenter.loadTasks(true);
+        mPresenter.loadTasks(false);
     }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -411,7 +341,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         // to show some Intent stubbing.
         int flag = taskFlag.getFlag();
         Intent intent = new Intent();
-        if(flag >= 2) {
+        if(flag == 2) {
             intent.setClass(getContext(), TaskRankActivity.class);
             intent.putExtra("TaskId",taskFlag.getTaskId());
             startActivity(intent);
@@ -420,11 +350,11 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 //            intent.putExtra("TaskId",taskFlag.getTaskId());
 //            startActivity(intent);
             intent.setClass(getContext(), ActiveTackDetails.class);
-            Bundle extra = new Bundle();
-            extra.putParcelable(PAR_KEY,taskFlag);
-            intent.putExtras(extra);
+//            Bundle extra = new Bundle();
+//            extra.putParcelable(PAR_KEY,taskFlag);
+//            intent.putExtras(extra);
             startActivity(intent);
-        }else if(flag <- 1){
+        }else if(flag == -2){
             intent.setClass(getContext(), TaskDetails.class);
             startActivity(intent);
         }
@@ -467,7 +397,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         String key2 = "taskId";
         String value1 = user.getUserId();
         if(taskId == null){
-            taskId = task.getTaskId();
+            taskId = currenTask.getTaskId();
         }
         String value2 = taskId;
         params.put(key1, value1);
@@ -561,7 +491,8 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 
         @Override
         public int getItemViewType(int position) {
-            if(mTasks.get(position).getFlag() < 1){
+            int flag = mTasks.get(position).getFlag();
+            if( flag < 1){
                 return TYPE_ACTIVE;
             }else {
                 return TYPE_COMPLETED;
@@ -575,7 +506,6 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            final Task item = mTasks.get(i);
             final Task task = getItem(i);
             final ViewHolder holder;
             final CompletedHolder comHolder;
@@ -598,14 +528,10 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                     }
 
                     strategy_text = sp.getString("strategy", null);
-                    money_text = sp.getString("money", null);
                     if (strategy_text != null) {
                         holder.strategy.setText(strategy_text);
                     }
-                    if (money_text != null) {
-                        holder.money.setText("任务酬劳:" + money_text);
-                    }
-
+                    holder.money.setText("任务金额:" + getItem(i).getMoney());
                     holder.time.setText("开始时间:" + getItem(i).getBeginTime());
 
                     switch (task.getFlag()) {
@@ -618,21 +544,36 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                         case 0:
                             holder.join.setText("已参与");
                             break;
-                        case 1:
-                            holder.join.setText("未提交");
-                            break;
-                        case 2:
-                            holder.join.setText("结束");
-                            break;
-                        case 3:
-                            holder.join.setText("任务过期");
+//                        case 1:
+//                            holder.join.setText("结束");
+//                            break;
+//                        case 2:
+//                            holder.join.setText("结束");
+//                            break;
+//                        case -3:
+//                            holder.join.setText("参与任务人数已达上限");
+//                            break;
+                        default:
                             break;
                     }
                     holder.share.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            taskId = item.getTaskId();
-                            share(taskId);
+                            if(task.getFlag() == -2){
+                                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                                alertDialogBuilder.setTitle("提示");
+                                alertDialogBuilder.setMessage("只有参与到任务中，才可以分享任务");
+                                alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.cancel();
+                                    }
+                                });
+                                alertDialogBuilder.create().show();
+                            }else {
+                                taskId = task.getTaskId();
+                                share(taskId);
+                            }
                         }
                     });
                     break;
@@ -651,23 +592,25 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                     }
                     comHolder.time.setText("开始时间:" + getItem(i).getBeginTime());
                     switch (task.getFlag()) {
-                        case -2:
-                            comHolder.join.setText("未参与");
-                            break;
-                        case -1:
-                            comHolder.join.setText("已参与");
-                            break;
-                        case 0:
-                            comHolder.join.setText("已参与");
-                            break;
+//                        case -2:
+//                            comHolder.join.setText("未参与");
+//                            break;
+//                        case -1:
+//                            comHolder.join.setText("已参与");
+//                            break;
+//                        case 0:
+//                            comHolder.join.setText("已参与");
+//                            break;
                         case 1:
-                            comHolder.join.setText("未提交");
+                            comHolder.join.setText("结束");
                             break;
                         case 2:
                             comHolder.join.setText("结束");
                             break;
-                        case 3:
-                            comHolder.join.setText("任务过期");
+                        case -3:
+                            comHolder.join.setText("参与任务人数已达上限");
+                            break;
+                        default:
                             break;
                     }
                     break;
@@ -694,44 +637,6 @@ public class TasksFragment extends Fragment implements TasksContract.View {
             ImageView pic;
             TextView time;
             Button join;
-        }
-    }
-    private class getRecordTimeDis extends AsyncTask<Void, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            String json = null;
-            String time = "0";
-            String distance = "0";
-            try {
-                json = NetUtil.getRecordTimeDis(task.getTaskId(),userId);
-            } catch (SoapFault | NullPointerException soapFault) {
-                soapFault.printStackTrace();
-            }
-
-            if(json.equals("0")){
-
-            }else {
-                //获取消息
-                String[] split = json.split(";");
-                time = split[0];
-                distance = split[1];
-
-
-                Log.d("result", TAG + time+distance);
-                user.setLastTime(time);
-                user.setLastDistance(distance);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-
         }
     }
 

@@ -40,12 +40,12 @@ public class ActiveTackDetails extends BaseActivity{
 
     private SharedPreferences sp;
     private CurrentUser user;
+    private Task currenTask;
 
     private String mCurrentNum;
     private String mCurrentLevel;
     private String mStartTime;
     private String mStrategy;
-    private Task task;
     private String mobID;
     private String userId;
     private String taskId;
@@ -62,33 +62,21 @@ public class ActiveTackDetails extends BaseActivity{
         taskLong = (TextView) findViewById(R.id.length);
         strategy_text = (TextView)findViewById(R.id.strategy_text);
 
-        task = (Task) getIntent().getParcelableExtra(TasksFragment.PAR_KEY);
+//        task = (Task) getIntent().getParcelableExtra(TasksFragment.PAR_KEY);
         share = (Button) findViewById(R.id.btn_share);
         share.setOnClickListener(this);
-        taskId = task.getTaskId();
+
 
         user = CurrentUser.getOnlyUser();
+        currenTask = user.getCurrentTask();
         userId = user.getUserId();
-        mCurrentNum = user.getCurrentNum();
-        mCurrentLevel = user.getCurrentLevel();
-        mStartTime = user.getStartTime();
+        taskId = currenTask.getTaskId();
+        mCurrentNum = currenTask.getCurrentNum();
+        mCurrentLevel = currenTask.getCurrentLevel();
+        mStartTime = currenTask.getStartTime();
 
-        Logger.d("taskInfo: " + mCurrentNum+" "+mCurrentLevel);
+        Logger.d(currenTask.toString());
         sp = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
-
-        if(mCurrentNum.isEmpty()||mCurrentNum == ""){
-            mCurrentNum = sp.getString("num","0");
-            user.setCurrentNum(mCurrentNum);
-        }
-        if(mCurrentLevel.isEmpty()||mCurrentLevel == ""){
-            mCurrentLevel = sp.getString("level","0");
-            user.setCurrentLevel(mCurrentLevel);
-            Logger.d("taskInfo: " +mCurrentLevel +" "+user.getCurrentLevel());
-        }
-        if(mStartTime.isEmpty()||mStartTime == ""){
-            mStartTime = sp.getString("startTime","0");
-            user.setStartTime(mStartTime);
-        }
 
         mStrategy = sp.getString("strategy",null);
 
@@ -126,7 +114,7 @@ public class ActiveTackDetails extends BaseActivity{
         String key1 = "userId";
         String key2 = "taskId";
         String value1 = user.getUserId();
-        String value2 = task.getTaskId();
+        String value2 = currenTask.getTaskId();
         params.put(key1, value1);
         params.put(key2, value2);
 

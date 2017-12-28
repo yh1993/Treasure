@@ -16,7 +16,6 @@
 
 package com.dell.treasure.source.local;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.dell.treasure.dao.DaoSession;
@@ -24,6 +23,9 @@ import com.dell.treasure.dao.Task;
 import com.dell.treasure.dao.TaskDao;
 import com.dell.treasure.source.TasksDataSource;
 import com.dell.treasure.support.MyApp;
+import com.orhanobut.logger.Logger;
+
+import org.greenrobot.greendao.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,11 @@ public class TasksLocalDataSource implements TasksDataSource {
      * or the table is empty.
      */
     @Override
+    public List<Task> init(){
+        List<Task> tasks = new ArrayList<>();
+        return tasks = taskDao.queryBuilder().orderAsc(TaskDao.Properties.Id).list();
+    }
+    @Override
     public void getTasks(@NonNull LoadTasksCallback callback) {
         List<Task> tasks = new ArrayList<>();
 
@@ -76,10 +83,10 @@ public class TasksLocalDataSource implements TasksDataSource {
      * found.
      */
     @Override
-    public void getTask(@NonNull Long taskId, @NonNull GetTaskCallback callback) {
+    public void getTask(@NonNull Long Id, @NonNull GetTaskCallback callback) {
         Task task = null;
 
-        task = taskDao.load(taskId);
+        task = taskDao.load(Id);
 
         if (task != null) {
             callback.onTaskLoaded(task);
@@ -89,19 +96,51 @@ public class TasksLocalDataSource implements TasksDataSource {
     }
 
     @Override
+    public Task getTask(String taskId) {
+        Query<Task> taskQueryCur = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(taskId)).build();
+        List<Task> tasksCur = taskQueryCur.list();
+        if(tasksCur.size() > 0){
+            return tasksCur.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public void saveTask(@NonNull Task task) {
         taskDao.insert(task);
     }
 
     @Override
     public void completeTask(@NonNull Task task) {
-        task.setFlag(2);
+        Logger.d(task.toString());
+        if(isTaskExist(task.getTaskId())) {
+            taskDao.update(task);
+        }
+    }
+
+    @Override
+    public void completeTask(@NonNull Long Id) {
+
+    }
+
+    @Override
+    public void updateTask(@NonNull Task task) {
         taskDao.update(task);
     }
 
     @Override
-    public void completeTask(@NonNull Long taskId) {
+    public boolean isTaskExist(@NonNull String taskId) {
+        Query<Task> taskQueryCur = taskDao.queryBuilder().where(TaskDao.Properties.TaskId.eq(taskId)).build();
 
+        List<Task> tasksCur = taskQueryCur.list();
+        for (Task task2:tasksCur) {
+            Logger.d(task2.toString());
+        }
+
+        if(tasksCur != null && tasksCur.size() > 0){
+            return true;
+        }
+        return false;
     }
 
 //    @Override
@@ -147,7 +186,7 @@ public class TasksLocalDataSource implements TasksDataSource {
     }
 
     @Override
-    public void deleteTask(@NonNull Long taskId) {
-        taskDao.deleteByKey(taskId);
+    public void deleteTask(@NonNull Long Id) {
+        taskDao.deleteByKey(Id);
     }
 }

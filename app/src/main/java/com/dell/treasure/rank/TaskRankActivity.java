@@ -21,6 +21,7 @@ import com.dell.treasure.service.UserInfo;
 import com.dell.treasure.share.BaseActivity;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.NetUtil;
+import com.orhanobut.logger.Logger;
 
 import net.sf.json.JSONArray;
 
@@ -51,8 +52,8 @@ public class TaskRankActivity extends BaseActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.fragment_main_rank);
         userName = CurrentUser.getOnlyUser().getUsername();
-        userId = CurrentUser.getOnlyUser().getUserId();
 
+        userId = CurrentUser.getOnlyUser().getUserId();
         mTaskItems = new ArrayList<TaskRankItem>();
         mRecyclerView=(RecyclerView) findViewById(R.id.recylerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));

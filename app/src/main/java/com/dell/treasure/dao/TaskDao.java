@@ -34,9 +34,15 @@ public class TaskDao extends AbstractDao<Task, Long> {
                 "\"LAST_ID\" TEXT," + // 1: lastId
                 "\"TASK_ID\" TEXT UNIQUE ," + // 2: taskId
                 "\"TARGET_BLE\" TEXT," + // 3: targetBle
-                "\"BEGIN_TIME\" TEXT," + // 4: beginTime
-                "\"END_TIME\" TEXT," + // 5: endTime
-                "\"FLAG\" INTEGER NOT NULL );"); // 6: flag
+                "\"START_TIME\" TEXT," + // 4: startTime
+                "\"BEGIN_TIME\" TEXT," + // 5: beginTime
+                "\"LENGTH\" REAL NOT NULL ," + // 6: length
+                "\"DISTANCE\" TEXT," + // 7: distance
+                "\"NEED_NUM\" TEXT," + // 8: needNum
+                "\"CURRENT_NUM\" TEXT," + // 9: currentNum
+                "\"CURRENT_LEVEL\" TEXT," + // 10: currentLevel
+                "\"MONEY\" TEXT," + // 11: money
+                "\"FLAG\" INTEGER NOT NULL );"); // 12: flag
     }
 
     /** Drops the underlying database table. */
@@ -69,16 +75,42 @@ public class TaskDao extends AbstractDao<Task, Long> {
             stmt.bindString(4, targetBle);
         }
 
-        String beginTime = entity.getBeginTime();
-        if (beginTime != null) {
-            stmt.bindString(5, beginTime);
+        String startTime = entity.getStartTime();
+        if (startTime != null) {
+            stmt.bindString(5, startTime);
         }
 
-        String endTime = entity.getEndTime();
-        if (endTime != null) {
-            stmt.bindString(6, endTime);
+        String beginTime = entity.getBeginTime();
+        if (beginTime != null) {
+            stmt.bindString(6, beginTime);
         }
-        stmt.bindLong(7, entity.getFlag());
+        stmt.bindDouble(7, entity.getLength());
+
+        String distance = entity.getDistance();
+        if (distance != null) {
+            stmt.bindString(8, distance);
+        }
+
+        String needNum = entity.getNeedNum();
+        if (needNum != null) {
+            stmt.bindString(9, needNum);
+        }
+
+        String currentNum = entity.getCurrentNum();
+        if (currentNum != null) {
+            stmt.bindString(10, currentNum);
+        }
+
+        String currentLevel = entity.getCurrentLevel();
+        if (currentLevel != null) {
+            stmt.bindString(11, currentLevel);
+        }
+
+        String money = entity.getMoney();
+        if (money != null) {
+            stmt.bindString(12, money);
+        }
+        stmt.bindLong(13, entity.getFlag());
     }
 
     @Override
@@ -105,16 +137,42 @@ public class TaskDao extends AbstractDao<Task, Long> {
             stmt.bindString(4, targetBle);
         }
 
-        String beginTime = entity.getBeginTime();
-        if (beginTime != null) {
-            stmt.bindString(5, beginTime);
+        String startTime = entity.getStartTime();
+        if (startTime != null) {
+            stmt.bindString(5, startTime);
         }
 
-        String endTime = entity.getEndTime();
-        if (endTime != null) {
-            stmt.bindString(6, endTime);
+        String beginTime = entity.getBeginTime();
+        if (beginTime != null) {
+            stmt.bindString(6, beginTime);
         }
-        stmt.bindLong(7, entity.getFlag());
+        stmt.bindDouble(7, entity.getLength());
+
+        String distance = entity.getDistance();
+        if (distance != null) {
+            stmt.bindString(8, distance);
+        }
+
+        String needNum = entity.getNeedNum();
+        if (needNum != null) {
+            stmt.bindString(9, needNum);
+        }
+
+        String currentNum = entity.getCurrentNum();
+        if (currentNum != null) {
+            stmt.bindString(10, currentNum);
+        }
+
+        String currentLevel = entity.getCurrentLevel();
+        if (currentLevel != null) {
+            stmt.bindString(11, currentLevel);
+        }
+
+        String money = entity.getMoney();
+        if (money != null) {
+            stmt.bindString(12, money);
+        }
+        stmt.bindLong(13, entity.getFlag());
     }
 
     @Override
@@ -129,9 +187,15 @@ public class TaskDao extends AbstractDao<Task, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // lastId
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // taskId
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // targetBle
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // beginTime
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // endTime
-            cursor.getInt(offset + 6) // flag
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // startTime
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // beginTime
+            cursor.getDouble(offset + 6), // length
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // distance
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // needNum
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // currentNum
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // currentLevel
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // money
+            cursor.getInt(offset + 12) // flag
         );
         return entity;
     }
@@ -142,9 +206,15 @@ public class TaskDao extends AbstractDao<Task, Long> {
         entity.setLastId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setTaskId(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setTargetBle(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setBeginTime(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setEndTime(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setFlag(cursor.getInt(offset + 6));
+        entity.setStartTime(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setBeginTime(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setLength(cursor.getDouble(offset + 6));
+        entity.setDistance(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setNeedNum(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setCurrentNum(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setCurrentLevel(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setMoney(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setFlag(cursor.getInt(offset + 12));
      }
      
     @Override
@@ -181,9 +251,15 @@ public class TaskDao extends AbstractDao<Task, Long> {
         public final static Property LastId = new Property(1, String.class, "lastId", false, "LAST_ID");
         public final static Property TaskId = new Property(2, String.class, "taskId", false, "TASK_ID");
         public final static Property TargetBle = new Property(3, String.class, "targetBle", false, "TARGET_BLE");
-        public final static Property BeginTime = new Property(4, String.class, "beginTime", false, "BEGIN_TIME");
-        public final static Property EndTime = new Property(5, String.class, "endTime", false, "END_TIME");
-        public final static Property Flag = new Property(6, int.class, "flag", false, "FLAG");
+        public final static Property StartTime = new Property(4, String.class, "startTime", false, "START_TIME");
+        public final static Property BeginTime = new Property(5, String.class, "beginTime", false, "BEGIN_TIME");
+        public final static Property Length = new Property(6, double.class, "length", false, "LENGTH");
+        public final static Property Distance = new Property(7, String.class, "distance", false, "DISTANCE");
+        public final static Property NeedNum = new Property(8, String.class, "needNum", false, "NEED_NUM");
+        public final static Property CurrentNum = new Property(9, String.class, "currentNum", false, "CURRENT_NUM");
+        public final static Property CurrentLevel = new Property(10, String.class, "currentLevel", false, "CURRENT_LEVEL");
+        public final static Property Money = new Property(11, String.class, "money", false, "MONEY");
+        public final static Property Flag = new Property(12, int.class, "flag", false, "FLAG");
     }
     
 }

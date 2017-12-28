@@ -207,10 +207,10 @@
         <service android:name=".service.Location"/>
         <service android:name=".service.UserInfo"/>
         <service android:name=".service.TraceService"/>
-        <service android:name=".service.AlarmService"/>
+        <!--<service android:name=".service.AlarmService"/>-->
         <service android:name=".service.MonitorService"/>
         <service android:name=".service.PrepareService"/>
-        <service android:name=".service.NetService"/>
+        <!--<service android:name=".service.NetService"/>-->
         <service android:name=".service.UploadService"/>
 
 

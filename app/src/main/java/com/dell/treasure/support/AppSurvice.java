@@ -41,7 +41,7 @@ public class AppSurvice {
         PendingIntent pi = null;
         if(appState){
             Intent taskIntent = new Intent(context,TaskDetails.class);
-            CurrentUser.getOnlyUser().setTasKind("1");
+//            CurrentUser.getOnlyUser().setTasKind("1");
             pi = PendingIntent.getActivity(context,0,taskIntent,PendingIntent.FLAG_CANCEL_CURRENT);
         }else{
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.dell.treasure");
