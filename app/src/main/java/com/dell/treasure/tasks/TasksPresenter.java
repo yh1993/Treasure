@@ -80,6 +80,7 @@ public class TasksPresenter implements TasksContract.Presenter {
                 List<Task> tasksToShow = new ArrayList<Task>();
                 // We filter the tasks based on the requestType
                 for (Task task : tasks) {
+                    Logger.d(task.toString());
                     switch (mCurrentFiltering) {
 //                        case ALL_TASKS:
 //                            if (task.getFlag() > -3) {

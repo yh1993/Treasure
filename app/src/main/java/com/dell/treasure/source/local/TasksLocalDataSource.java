@@ -114,7 +114,9 @@ public class TasksLocalDataSource implements TasksDataSource {
     public void completeTask(@NonNull Task task) {
         Logger.d(task.toString());
         if(isTaskExist(task.getTaskId())) {
-            taskDao.update(task);
+            Task task1 = new Task();
+            task1.setTask(task);
+            taskDao.update(task1);
         }
     }
 
@@ -125,7 +127,9 @@ public class TasksLocalDataSource implements TasksDataSource {
 
     @Override
     public void updateTask(@NonNull Task task) {
-        taskDao.update(task);
+        Task task1 = new Task();
+        task1.setTask(task);
+        taskDao.update(task1);
     }
 
     @Override

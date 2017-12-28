@@ -82,7 +82,6 @@ public class Task implements Parcelable{
     @Generated(hash = 733837707)
     public Task() {
     }
-
     protected Task(Parcel in) {
         id = in.readLong();
         lastId = in.readString();

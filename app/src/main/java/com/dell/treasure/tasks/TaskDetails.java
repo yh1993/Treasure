@@ -189,32 +189,33 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
 
     @Override
     public void onBackPressed() {
-        new AlertDialog.Builder(TaskDetails.this)
-                .setTitle("提示")
-                .setMessage("确定要退出吗，您还没有选择是否参与当前任务？")
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setPositiveButton("参与", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String needNum = currenTask.getNeedNum();
-                        if(Integer.parseInt(num) <= Integer.parseInt(needNum)){
-                            joinTask();
-                            currenTask.setFlag(-1);
-                        }else{
-                            currenTask.setFlag(-3);
-                            Toast.makeText(TaskDetails.this,"非常抱歉，本次任务参与人数已达上线，请下次任务早点参与！",Toast.LENGTH_LONG).show();
-                            onBack();
-                        }
-                        finish();
-                    }
-                })
-                .setNegativeButton("放弃", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        onBack();
-                    }
-                })
-                .show();
+        onBack();
+//        new AlertDialog.Builder(TaskDetails.this)
+//                .setTitle("提示")
+//                .setMessage("确定要退出吗，您还没有选择是否参与当前任务？")
+//                .setIcon(android.R.drawable.ic_dialog_info)
+//                .setPositiveButton("参与", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        String needNum = currenTask.getNeedNum();
+//                        if(Integer.parseInt(num) <= Integer.parseInt(needNum)){
+//                            joinTask();
+//                            currenTask.setFlag(-1);
+//                        }else{
+//                            currenTask.setFlag(-3);
+//                            Toast.makeText(TaskDetails.this,"非常抱歉，本次任务参与人数已达上线，请下次任务早点参与！",Toast.LENGTH_LONG).show();
+//                            onBack();
+//                        }
+//                        finish();
+//                    }
+//                })
+//                .setNegativeButton("放弃", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        onBack();
+//                    }
+//                })
+//                .show();
     }
 
     @Override

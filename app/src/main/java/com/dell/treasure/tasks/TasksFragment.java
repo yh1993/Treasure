@@ -243,6 +243,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
 //                        break;
                 }
                 mPresenter.loadTasks(false);
+                Logger.d(currenTask.toString());
                 return true;
             }
         });

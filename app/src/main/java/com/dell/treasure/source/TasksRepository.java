@@ -69,10 +69,10 @@ public class TasksRepository implements TasksDataSource {
         if (INSTANCE == null) {
             INSTANCE = new TasksRepository(tasksLocalDataSource);
             INSTANCE.refreshCache(tasksLocalDataSource.init());
+
         }
         return INSTANCE;
     }
-
 
     public static void destroyInstance() {
         INSTANCE = null;
@@ -284,7 +284,7 @@ public class TasksRepository implements TasksDataSource {
     }
 
 
-    private void refreshCache(List<Task> tasks) {
+    public void refreshCache(List<Task> tasks) {
         if (mCachedTasks == null) {
             mCachedTasks = new LinkedHashMap<>();
         }

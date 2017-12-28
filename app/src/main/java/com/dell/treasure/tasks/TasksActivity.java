@@ -90,6 +90,7 @@ public class TasksActivity extends AppCompatActivity {
         myApp = (MyApp)getApplication();
         userInfo= CurrentUser.getOnlyUser();
         currentTask = userInfo.getCurrentTask();
+        Logger.d("1 "+currentTask.toString());
         username = userInfo.getUsername();
         mtasksLocalDataSource = TasksLocalDataSource.getInstance();
         mtasksRepository = TasksRepository.getInstance(mtasksLocalDataSource);
@@ -195,6 +196,7 @@ public class TasksActivity extends AppCompatActivity {
     public void initCurrenTask(){
         taskId = userInfo.getTaskId();
         if(taskId != null){
+            Logger.d(taskId);
             //有任务
             if(mtasksRepository.isTaskExist(taskId)) {
                 currentTask.setTask(mtasksRepository.getTask(taskId));
@@ -214,6 +216,7 @@ public class TasksActivity extends AppCompatActivity {
                 }
             }
         }else{
+            Logger.d("当前没接收到任务");
             //当前没接收到任务
             isCurrFlag = 0;
         }
@@ -456,8 +459,8 @@ public class TasksActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-            Intent intent = new Intent();
-            startService(new Intent(TasksActivity.this, UserInfo.class));
+//            Intent intent = new Intent();
+//            startService(new Intent(TasksActivity.this, UserInfo.class));
             switch (item.getItemId()){
                 case R.id.navigation_item_yes:
 //                    currentIndex = 0;
@@ -505,6 +508,7 @@ public class TasksActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("result","UserInfo start");
             String point = intent.getStringExtra("points");
             String Money = intent.getStringExtra("money");
             points.setText(point);
@@ -517,6 +521,7 @@ public class TasksActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("result","TaskInfo start");
             Boolean isEnd = intent.getBooleanExtra("isEnd",false);
             if(mTasksPresenter != null){
 //            mTasksPresenter.start();
