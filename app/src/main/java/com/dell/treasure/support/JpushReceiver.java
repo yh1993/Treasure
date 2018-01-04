@@ -10,8 +10,10 @@ import android.util.Log;
 
 import com.dell.treasure.SignInActivity;
 import com.dell.treasure.service.AdvertiserService;
+import com.dell.treasure.service.OverTaskUpService;
 import com.dell.treasure.service.PrepareService;
 import com.dell.treasure.service.ScannerService;
+import com.dell.treasure.service.UploadService;
 import com.orhanobut.logger.Logger;
 
 import cn.jpush.android.api.JPushInterface;
@@ -69,12 +71,17 @@ public class JpushReceiver extends BroadcastReceiver {
 
                 } else if(mFlag.equals("004")){
                     Logger.d("task over 1");
+//                    context.startService(new Intent(context, OverTaskUpService.class));
                     Intent taskEnd = new Intent("com.dell.treasure.RECEIVER_TaskInfo");
                     taskEnd.putExtra("isEnd",true);
                     localBroadcastManager.sendBroadcast(taskEnd);
 
                     stopTask(context);
                     running = false;
+                }
+                else if(mFlag.equals("003")){
+                    Logger.d("task over 003");
+                    context.startService(new Intent(context, UploadService.class));
                 }
                 running = false;
             }

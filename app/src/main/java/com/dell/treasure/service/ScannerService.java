@@ -55,6 +55,7 @@ public class ScannerService extends Service {
 
         initialize();
         if(currenTask.getFlag() == 0 || currenTask.getFlag() == -1){
+            Logger.d("scan start");
             StartTask.startTask(this);
         }
         super.onCreate();

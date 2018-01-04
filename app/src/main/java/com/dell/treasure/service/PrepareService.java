@@ -1,9 +1,11 @@
 package com.dell.treasure.service;
 
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -13,8 +15,12 @@ import com.dell.treasure.dao.Task;
 import com.dell.treasure.source.TasksRepository;
 import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.CurrentUser;
+import com.dell.treasure.support.NetUtil;
+import com.dell.treasure.tasks.ActiveTackDetails;
 import com.dell.treasure.tasks.TaskDetails;
 import com.orhanobut.logger.Logger;
+
+import org.ksoap2.SoapFault;
 
 import java.util.Date;
 
@@ -89,16 +95,20 @@ public class PrepareService extends Service {
             stopSelf();
         }else{
 //            isAppSurvive();
-            start();
+            new getTaskTitle().execute();
         }
     }
 
-    private void start(){
+    private void start(String title){
         insertTask();
         Intent taskIntent = new Intent(context, TaskDetails.class);
 //        user.setTasKind("1");
+
+        if(title == null){
+            title = "收到任务，点击进入程序查看详情。";
+        }
         PendingIntent pi = PendingIntent.getActivity(context, 0, taskIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        sendDefaultNotice(getApplicationContext(), "任务", "收到任务，点击进入程序查看详情。", R.mipmap.ic_launcher, pi);
+        sendDefaultNotice(getApplicationContext(), "任务", title , R.mipmap.ic_launcher, pi);
         stopSelf();
     }
 
@@ -132,5 +142,30 @@ public class PrepareService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    private class getTaskTitle extends AsyncTask<Void, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String json = null;
+            try {
+                json = NetUtil.getTaskTitle();   //true 为注册阶段  false 任务阶段
+            } catch (SoapFault soapFault) {
+                soapFault.printStackTrace();
+            }
+
+            start(json);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+        }
     }
 }

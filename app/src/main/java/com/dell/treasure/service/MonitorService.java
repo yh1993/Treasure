@@ -88,6 +88,7 @@ public class MonitorService extends Service {
         super.onDestroy();
         Logger.d("task over 4" );
         isRunning = false;
+        stopService(new Intent(this,UploadService.class));
 
     }
 

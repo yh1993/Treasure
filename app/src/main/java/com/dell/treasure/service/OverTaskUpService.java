@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.baidu.trace.OnTrackListener;
 import com.dell.treasure.dao.Task;
@@ -23,23 +21,19 @@ import org.json.JSONObject;
 import org.ksoap2.SoapFault;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
 import static com.dell.treasure.support.TaskRelated.endTask;
 import static com.dell.treasure.support.TaskRelated.isOverdue;
-import static com.dell.treasure.support.ToolUtil.stringToDate;
 import static com.dell.treasure.support.ToolUtil.stringToDate1;
 
 /**
- * Created by yh on 2017/11/26.
+ * Created by yh on 2017/12/31.
  */
 
-public class UploadService extends Service {
-    public static final String TAG = "UploadService";
-    public static boolean isOver = false;
+public class OverTaskUpService extends Service {
     /**
      * Track监听器
      */
@@ -68,14 +62,13 @@ public class UploadService extends Service {
         super.onCreate();
         myApp = (MyApp) getApplication();
         initOnTrackListener();
-        sp = UploadService.this.getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
+        sp = this.getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         user = CurrentUser.getOnlyUser();
         currenTask = user.getCurrentTask();
-        Logger.d("upload "+currenTask.toString());
 
         userId = user.getUserId();
         lastId = currenTask.getLastId();
@@ -106,7 +99,7 @@ public class UploadService extends Service {
 
     public void isOverTime(){
         if(isOverdue(startTime)){
-            endTask(UploadService.this,user);
+            endTask(this,user);
             stopSelf();
         }
     }
@@ -120,7 +113,6 @@ public class UploadService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Logger.d("task over 6" + currenTask.toString());
     }
 
     // 查询里程
@@ -213,7 +205,7 @@ public class UploadService extends Service {
 
             try {
                 json = NetUtil.RecordParti(userId, taskId, user.getTime(), user.getDistance(), way, lastId,isFound);
-                Logger.d("5、上报参与信息2 canyu "+userId+" "+taskId+" "+lastId+" "+isFound+" "+user.getTime()+" "+user.getDistance());
+                Logger.d("004结束上报 canyu "+userId+" "+taskId+" "+lastId+" "+isFound+" "+user.getTime()+" "+user.getDistance());
 
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();

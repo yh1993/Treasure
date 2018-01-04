@@ -29,27 +29,20 @@ import android.widget.TextView;
 import com.dell.treasure.R;
 import com.dell.treasure.SignInActivity;
 import com.dell.treasure.dao.Task;
-import com.dell.treasure.dao.TaskDao;
-import com.dell.treasure.rank.RegisterActivity;
 import com.dell.treasure.service.AdvertiserService;
-import com.dell.treasure.service.PrepareService;
 import com.dell.treasure.service.ScannerService;
 import com.dell.treasure.service.UserInfo;
-import com.dell.treasure.share.InviteActivity;
 import com.dell.treasure.source.TasksRepository;
 import com.dell.treasure.source.local.TasksLocalDataSource;
 import com.dell.treasure.support.ActivityUtils;
 import com.dell.treasure.support.CurrentUser;
-import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.support.MyApp;
 import com.dell.treasure.support.NetUtil;
 import com.orhanobut.logger.Logger;
 
-import org.greenrobot.greendao.query.Query;
 import org.ksoap2.SoapFault;
 
 import java.util.Date;
-import java.util.List;
 
 import static com.dell.treasure.support.TaskRelated.endTask;
 import static com.dell.treasure.support.TaskRelated.isOverdue;
@@ -81,6 +74,8 @@ public class TasksActivity extends AppCompatActivity {
     private String username;
     private String taskTmp;
     private String fromUserIdTmp;
+    private String taskIdTemp;
+    private String lastIdTemp;
     private int isCurrFlag;  //  0 没有任务  1 有任务  2 有任务，且正在执行
 
     @Override
@@ -171,6 +166,8 @@ public class TasksActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Logger.d("3");
+        taskIdTemp = null;
+        lastIdTemp = null;
         isFirst = sp.getBoolean("FIRST", true);
         String points1 = sp.getString("points", "");
         String money1 = sp.getString("money", "");
@@ -218,7 +215,26 @@ public class TasksActivity extends AppCompatActivity {
         }else{
             Logger.d("当前没接收到任务");
             //当前没接收到任务
+            Task taskTmp = mtasksRepository.getActivieTask();
             isCurrFlag = 0;
+            if(taskTmp != null) {
+                currentTask.setTask(taskTmp);
+                if (isOverdue(currentTask.getStartTime())) {
+                    //任务过期
+                    endTask(TasksActivity.this, userInfo);
+                    isCurrFlag = 0;
+                } else {
+                    //有任务
+                    if (currentTask.getFlag() == -2) {
+                        isCurrFlag = 1;
+                    } else {
+                        //正在执行
+                        isCurrFlag = 2;
+                        initData();
+                    }
+                }
+            }
+
         }
     }
     void initData(){
@@ -230,6 +246,7 @@ public class TasksActivity extends AppCompatActivity {
 
     //提示
     private void restartDialog(final int flag) {
+        Logger.d("重新开始");
         new getRecordTimeDis().execute();
         Intent startScanService = new Intent(this, ScannerService.class);
         startService(startScanService);
@@ -279,7 +296,7 @@ public class TasksActivity extends AppCompatActivity {
                 PopupDialog(dialog);
             }else if(isCurrFlag == 1){
                 Logger.d("从本地获取详细信息");
-                if(taskTmp == currentTask.getTaskId()){
+                if(taskTmp.equals(currentTask.getTaskId())){
                     currentTask.setLastId(fromUserIdTmp);
                     startActivity(new Intent(this,TaskDetails.class));
                 }else {
@@ -288,6 +305,8 @@ public class TasksActivity extends AppCompatActivity {
                 }
             }else if(isCurrFlag == 0){
                 Logger.d("从服务端获取详细信息");
+                taskIdTemp = taskTmp;
+                lastIdTemp = fromUserIdTmp;
                 getShareInfo();
             }
         }
@@ -296,14 +315,14 @@ public class TasksActivity extends AppCompatActivity {
     }
 
     private void getShareInfo(){
-        if (mtasksRepository.isTaskExist(taskTmp)) {
-            currentTask.setTask(mtasksRepository.getTask(taskTmp));
+        if (mtasksRepository.isTaskExist(taskIdTemp)) {
+            currentTask.setTask(mtasksRepository.getTask(taskIdTemp));
             if(isOverdue(currentTask.getStartTime())){
                 currentTask.setTask(new Task());
                 String dialog = "你好，该任务已过期。。。";
                 PopupDialog(dialog);
             }else {
-                currentTask.setLastId(fromUserIdTmp);
+                currentTask.setLastId(lastIdTemp);
                 startActivity(new Intent(this,TaskDetails.class));
             }
         }else {
@@ -548,6 +567,7 @@ public class TasksActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... params) {
             String json = null;
+            taskTmp = taskIdTemp;
             try {
                 json = NetUtil.getTaskInfo(taskTmp);
             } catch (SoapFault | NullPointerException soapFault) {
@@ -618,34 +638,4 @@ public class TasksActivity extends AppCompatActivity {
 
         }
     }
-
-//    private class isSignTask extends AsyncTask<Void, Void, String> {
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//        }
-//
-//        @Override
-//        protected String doInBackground(Void... params) {
-//            Boolean isSign = false;
-//            try {
-//                isSign = NetUtil.isSignPeriod();
-//            } catch (SoapFault soapFault) {
-//                soapFault.printStackTrace();
-//            }
-//            if(!isSign){
-//                currentState = "001";
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String s) {
-//            if(currentState.equals("000")){
-//                //招募阶段
-//                Intent intent = new Intent(TasksActivity.this, InviteActivity.class);
-//                startActivity(intent);
-//            }
-//        }
-//    }
 }

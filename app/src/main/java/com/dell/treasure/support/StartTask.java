@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.dell.treasure.service.MonitorService;
 import com.dell.treasure.service.TraceService;
+import com.dell.treasure.service.UploadService;
 
 /**
  * Created by DELL on 2017/7/19.
@@ -19,6 +20,8 @@ public class StartTask {
 
     public static void startTask(Context context) {
         serviceTrace = new Intent(context,TraceService.class);
+
+//        context.stopService(new Intent(context, UploadService.class));
 
         if(!TraceService.running) {
             context.startService(serviceTrace);

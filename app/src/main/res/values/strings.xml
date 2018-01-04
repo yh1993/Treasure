@@ -19,11 +19,16 @@
 
     <string name="img_launcher">图片</string>
     <string name="already_scanning">扫描已经开始.</string>
-    <string name="notice">"        欢迎参与校园寻宝游戏，我们将不定时发布寻宝任务（其实就是寻找一个在校园里任意活动的某位同学携带的手机），
-        并通过app推送任务信息，您需要打开手机蓝牙和GPS参与寻宝（只要您的手机曾经发现过那位同学的蓝牙，就算找到，会在任务结束时告知您结果），
-        同时可以将寻宝任务通过微信分享给您的朋友。最终我们会根据每个小伙伴的参与情况计算贡献值，然后根据贡献值按照某种机制分配奖金。"</string>
+    <string name="notice">"    游戏说明：欢迎参与校园寻宝游戏，我们将不定时发布寻宝任务（其实就是寻找一个在校园里任意活动的某位同学携带的手机），并通过app推送任务信息，您需要打开手机蓝牙和GPS参与寻宝（只要您的手机曾经发现过那位同学的蓝牙，就算找到，会在任务结束时告知您结果），同时可以将寻宝任务通过微信分享给您的朋友。最终我们会根据每个小伙伴的参与情况计算贡献值，然后根据贡献值按照某种机制分配奖金。
 
+        贡献值衡量方法：开启蓝牙时间越长，活动范围越广（根据您的GPS移动轨迹计算），招募到的其他小伙伴越多，您的贡献值就越大，如果您还能找到宝物，那您的贡献值还将增加更多，除此之外，为了鼓励参与，第一个参与者会额外增加一些贡献值。
 
+        强调1：每次任务进行2个小时，参与人数有限，来晚了就没有啦！
+        强调2：每次任务的奖金分配机制不同，请看清楚再参与！
+        强调3：每次任务限制和奖金分配机制请关注app首页！
+"</string>
+
+    <string name="task_tips">tips： 在任务中，开启蓝牙时间越长，活动范围越广，招募到的小伙伴越多，您的贡献值就越大，如果您还能找到宝物，那您的贡献值还将增加更多，除此之外，如果你还能第一个参与到任务会额外增加一些贡献值。</string>
     <string name="task_marked_complete">Task marked complete</string>
     <string name="task_marked_active">Task marked active</string>
     <string name="loading_tasks_error">载入时出错...</string>
@@ -47,6 +52,7 @@
     <string name="label_active">待完成</string>
     <string name="label_completed">已完成</string>
     <string name="no_tasks_all">暂时没有任务，任务来时会有通知。</string>
+    <string name="is_sign_period">&#160;&#160;本实验只能北邮本部的小伙伴参与，目前为注册阶段，预计1月5号正式开始实验，之后将关闭注册功能。</string>
     <string name="no_tasks_active">暂时没有待完成的任务，休息一下吧</string>
     <string name="no_tasks_completed">你还没有已完成的任务。。。</string>
 

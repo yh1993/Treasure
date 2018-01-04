@@ -1,10 +1,11 @@
 package com.dell.treasure.tasks;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -17,14 +18,14 @@ import com.dell.treasure.share.BaseActivity;
 import com.dell.treasure.support.CommonUtils;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
+import com.dell.treasure.support.NetUtil;
 import com.mob.moblink.ActionListener;
 import com.mob.moblink.MobLink;
 import com.orhanobut.logger.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.ksoap2.SoapFault;
 
-import cn.sharesdk.onekeyshare.OnekeyShare;
+import java.util.HashMap;
 
 /**
  * Created by yh on 2017/11/22.
@@ -49,6 +50,8 @@ public class ActiveTackDetails extends BaseActivity{
     private String mobID;
     private String userId;
     private String taskId;
+    private ProgressDialog pDialog;
+    private String shareTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,16 +82,18 @@ public class ActiveTackDetails extends BaseActivity{
         sp = getSharedPreferences(JpushReceiver.TASK, Context.MODE_PRIVATE);
 
         mStrategy = sp.getString("strategy",null);
+        shareTitle = null;
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        new getTaskTitle().execute();
         currentNum.setText(mCurrentNum);
         currentLevel.setText(mCurrentLevel);
         startTime.setText(mStartTime);
-        taskLong.setText("2小时");
+        taskLong.setText("2小时后");
         if(mStrategy != null){
             strategy_text.setText(mStrategy);
         }
@@ -99,7 +104,8 @@ public class ActiveTackDetails extends BaseActivity{
             case R.id.btn_share:
 //                showShare();
 //                setDefault();
-                share();
+//                share();
+                getMobID();
                 break;
             default:
                 super.onClick(v);
@@ -118,26 +124,28 @@ public class ActiveTackDetails extends BaseActivity{
         params.put(key1, value1);
         params.put(key2, value2);
 
-
+        Logger.d("share " + value1+" "+value2);
         MobLink.getMobID(params, CommonUtils.MAIN_PATH_ARR, source, new ActionListener() {
             public void onResult(HashMap<String, Object> params) {
                 if (params != null && params.containsKey("mobID")) {
                     mobID = String.valueOf(params.get("mobID"));
                     Logger.d("mobId: "+ mobID);
                 }
+                share();
             }
 
             public void onError(Throwable t) {
                 if (t != null) {
                     Toast.makeText(ActiveTackDetails.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
+                CommonUtils.getMobIdDialog(ActiveTackDetails.this).show();
             }
         });
     }
 
     private void share() {
 //        String shareUrl = "mlink://treasure.com"+ CommonUtils.MAIN_PATH_ARR;
-        getMobID();
+//        getMobID();
         if(TextUtils.isEmpty(mobID)) {
             CommonUtils.getMobIdDialog(this).show();
             return;
@@ -148,12 +156,49 @@ public class ActiveTackDetails extends BaseActivity{
             shareUrl += "?mobid=" + mobID;
         }
 
-
         String title = getString(R.string.invite_share_titel);
-        String text = getString(R.string.share_text);
+        String text = shareTitle;
+        if(shareTitle == null){
+            text = getString(R.string.share_text);
+        }
         String imgPath = CommonUtils.copyImgToSD(this, R.mipmap.ic_launcher , "invite");
         CommonUtils.showShare(this, title, text, shareUrl, imgPath);
+        Logger.d("share "+shareUrl);
 
+    }
+
+    private class getTaskTitle extends AsyncTask<Void, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(ActiveTackDetails.this);
+            pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置进度条的形式为圆形转动的进度条
+            pDialog.setIndeterminate(false);
+            pDialog.setCanceledOnTouchOutside(false);// 设置在点击Dialog外是否取消Dialog进度条
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String json = null;
+            try {
+                json = NetUtil.getTaskTitle();   //true 为注册阶段  false 任务阶段
+            } catch (SoapFault soapFault) {
+                soapFault.printStackTrace();
+            }
+
+            shareTitle = json;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(pDialog != null) {
+                pDialog.dismiss();
+                pDialog = null;
+            }
+        }
     }
 
 }

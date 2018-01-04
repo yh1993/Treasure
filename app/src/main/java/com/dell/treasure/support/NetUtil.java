@@ -575,6 +575,7 @@ public class NetUtil {
         SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
 //        SoapObject object = (SoapObject) envelope.getResponse();
         response = object.toString();
+        Log.d("result", "TaskReward: "+ response);
         return response;
     }
 
@@ -763,6 +764,33 @@ public class NetUtil {
 //        SoapObject object = (SoapObject) envelope.getResponse();
         response = object.toString();
         Log.d("result","getTaskInfo: "+response);
+        return response;
+    }
+
+    public static String getTaskTitle() throws SoapFault {
+
+        String response;
+
+        String methodName = "getTaskTitle";
+        String soapAction = "http://jxn.com/getTaskTitle";
+
+        SoapObject rpc = new SoapObject(nameSpace, methodName);
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+
+        envelope.bodyOut = rpc;
+        envelope.dotNet = true;
+        envelope.setOutputSoapObject(rpc);
+
+        HttpTransportSE transport = new HttpTransportSE(allPoint,TimeOut);
+        try {
+            transport.call(soapAction, envelope);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        SoapPrimitive object = (SoapPrimitive)envelope.getResponse();
+        response = object.toString();
         return response;
     }
 

@@ -92,7 +92,7 @@ public class TaskRankActivity extends BaseActivity {
             } catch (SoapFault | NullPointerException soapFault) {
                 soapFault.printStackTrace();
             }
-            if (json == null || money.isEmpty()){
+            if (json == null || money == null){
                 flag = 1;
             }else {
                 mTaskItems.clear();
@@ -136,7 +136,7 @@ public class TaskRankActivity extends BaseActivity {
             if(flag == 1){
                 Toast.makeText(TaskRankActivity.this,"数据获取失败，请尝试重新进入该界面",Toast.LENGTH_LONG).show();
             }else {
-                money_text.setText(money);
+                money_text.setText(money+"元");
                 TaskRankActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

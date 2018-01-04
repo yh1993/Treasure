@@ -14,6 +14,9 @@ public class CurrentUser {
     private String taskId = null;       //任务Id
     private String taskIdTmp = null;
     private String fromUserId;
+    private String time;
+    private String distance;
+    private Boolean isSign = false;
     private Task currentTask = new Task();
 
     private CurrentUser(){}
@@ -103,6 +106,30 @@ public class CurrentUser {
 
     public void currentTaskClear(){
         this.currentTask.setTask(new Task());
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
+        this.distance = distance;
+    }
+
+    public Boolean getSign() {
+        return isSign;
+    }
+
+    public void setSign(Boolean sign) {
+        isSign = sign;
     }
 
 //    public String getLastId() {

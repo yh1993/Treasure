@@ -108,6 +108,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     private String taskId;
     private String strategy_text;
     private SharedPreferences sp;
+    private TextView tips;
 
     public TasksFragment() {
 
@@ -161,6 +162,13 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         mNoTasksView = root.findViewById(R.id.noTasks);
         mNoTaskIcon = (ImageView) root.findViewById(R.id.noTasksIcon);
         mNoTaskMainView = (TextView) root.findViewById(R.id.noTasksMain);
+        tips = (TextView) root.findViewById(R.id.tips);
+        tips.setText(R.string.task_tips);
+        if(user.getSign()){
+            mNoTaskMainView.setText(R.string.is_sign_period);
+        }else {
+            mNoTaskMainView.setText(R.string.no_tasks_all);
+        }
 
 //        mNoTaskAddView.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -272,7 +280,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     @Override
     public void showTasks(List<Task> tasks,TasksFilterType type) {
         mListAdapter.replaceData(tasks,type);
-
+        Logger.d("tasks: "+tasks.toString());
         mTasksView.setVisibility(View.VISIBLE);
         mNoTasksView.setVisibility(View.GONE);
     }
@@ -403,7 +411,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         String value2 = taskId;
         params.put(key1, value1);
         params.put(key2, value2);
-
+        Logger.d("share " + value1+" "+value2);
 
         MobLink.getMobID(params, CommonUtils.MAIN_PATH_ARR, source, new ActionListener() {
             public void onResult(HashMap<String, Object> params) {
@@ -436,6 +444,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         String text = getString(R.string.share_text);
         String imgPath = CommonUtils.copyImgToSD(getActivity(), R.mipmap.ic_launcher , "invite");
         CommonUtils.showShare(getActivity(), title, text, shareUrl, imgPath);
+        Logger.d("share "+shareUrl);
 
     }
     public interface TaskItemListener {
@@ -572,8 +581,11 @@ public class TasksFragment extends Fragment implements TasksContract.View {
                                 });
                                 alertDialogBuilder.create().show();
                             }else {
-                                taskId = task.getTaskId();
-                                share(taskId);
+//                                taskId = task.getTaskId();
+//                                share(taskId);
+//                                Logger.d("share "+ taskId+" "+task.toString());
+                                Intent intent = new Intent(getContext(), ActiveTackDetails.class);
+                                startActivity(intent);
                             }
                         }
                     });

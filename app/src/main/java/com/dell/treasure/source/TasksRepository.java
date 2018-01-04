@@ -262,6 +262,11 @@ public class TasksRepository implements TasksDataSource {
     }
 
     @Override
+    public Task getActivieTask() {
+        return mTasksLocalDataSource.getActivieTask();
+    }
+
+    @Override
     public void refreshTasks() {
         mCacheIsDirty = true;
     }

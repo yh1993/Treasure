@@ -41,6 +41,8 @@ public interface TasksDataSource {
 
     Task getTask(String taskId);
 
+    Task getActivieTask();
+
     void saveTask(@NonNull Task task);
 
     void completeTask(@NonNull Task task);

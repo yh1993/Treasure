@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bkg">
+    android:background="@mipmap/bkg"
+    android:orientation="vertical">
 
     <TableLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingTop="40dp"
+        android:orientation="vertical"
         android:paddingBottom="40dp"
+        android:paddingTop="40dp"
         android:stretchColumns="1">
 
         <TableRow
@@ -23,13 +23,13 @@
 
                 <EditText
                     android:id="@+id/editTextSignInUser"
-                    android:layout_gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="20dp"
+                    android:layout_gravity="center"
                     android:ems="12"
                     android:hint="用户名"
-                    android:inputType="textPersonName"/>
+                    android:inputType="textPersonName"
+                    android:paddingTop="20dp"/>
                 <!--<requestFocus/>-->
             </android.support.design.widget.TextInputLayout>
         </TableRow>
@@ -38,18 +38,18 @@
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/passwordTextInput"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
                 <EditText
                     android:id="@+id/editTextSignInPsw"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="20dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
                     android:ems="12"
                     android:hint="密码"
-                    android:inputType="textPassword"/>
+                    android:inputType="textPassword"
+                    android:paddingTop="20dp"/>
             </android.support.design.widget.TextInputLayout>
         </TableRow>
     </TableLayout>
@@ -77,38 +77,46 @@
         android:padding="40dp"
         android:stretchColumns="0">
         <TableRow>
+
             <Button
-                android:layout_width="wrap_content"
                 android:id="@+id/buttonSignIn"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/white_button"
                 android:text="登  录" />
+
 
         </TableRow>
 
         <TableRow
             android:layout_marginTop="10dp">
 
-            <Button
-                android:id="@+id/login_forget_password_button"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="忘记密码?"
-                android:textSize="16sp"
-                android:textColor="#0ac"
-                android:background="@null"/>
-
+            <!--<Button-->
+                <!--android:id="@+id/login_forget_password_button"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_weight="1"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="忘记密码?"-->
+                <!--android:textSize="16sp"-->
+                <!--android:textColor="#0ac"-->
+                <!--android:background="@null"/>-->
             <Button
                 android:id="@+id/buttonSignUp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:text="注册"
-                android:textSize="16sp"
-                android:textColor="#0ac"
-                android:background="@null"/>
+                android:background="@drawable/white_button"
+                android:text="注 册" />
+
+            <!--<Button-->
+                <!--android:id="@+id/buttonSignUp"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_weight="1"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:text="注册"-->
+                <!--android:textSize="16sp"-->
+                <!--android:textColor="#0ac"-->
+                <!--android:background="@null"/>-->
         </TableRow>
     </TableLayout>
 </LinearLayout>

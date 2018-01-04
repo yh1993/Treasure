@@ -54,6 +54,8 @@ public class SignInActivity extends Activity{
     private TextInputLayout userTextInput,passwordTextInput;
     private String Spassword;
     private String taskId;
+
+    private CurrentUser user;
 //    private String currentState = "000";
 
     private MyHandler myHandler = new MyHandler(this);
@@ -64,12 +66,13 @@ public class SignInActivity extends Activity{
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_signin);
 
+        user = CurrentUser.getOnlyUser();
         Button buttonSignIn = (Button) findViewById(R.id.buttonSignIn);
         buttonSignIn.setOnClickListener( new SignInClickListener());
         Button buttonSignUp = (Button) findViewById(R.id.buttonSignUp);
         buttonSignUp.setOnClickListener( new SignUpClickListener());
-        Button mForgetPasswordButton = (Button) findViewById(R.id.login_forget_password_button);
-        mForgetPasswordButton.setOnClickListener( new ForgetPasswordListener());
+//        Button mForgetPasswordButton = (Button) findViewById(R.id.login_forget_password_button);
+//        mForgetPasswordButton.setOnClickListener( new ForgetPasswordListener());
         TextUsername = (EditText) findViewById(R.id.editTextSignInUser);
         TextPassword = (EditText) findViewById(R.id.editTextSignInPsw);
 //        checkBoxRemPSW = (CheckBox)findViewById(R.id.checkBoxRemPsw);
@@ -210,6 +213,15 @@ public class SignInActivity extends Activity{
         @Override
         protected String doInBackground(Void... params) {
             String json = null;
+
+            Boolean isSign = false;
+            try {
+                isSign = NetUtil.isSignPeriod();
+            } catch (SoapFault | NullPointerException soapFault) {
+                soapFault.printStackTrace();
+            }
+            user.setSign(isSign);
+
             try {
                 json = NetUtil.signIn(Sname,Spassword);
 
@@ -232,7 +244,7 @@ public class SignInActivity extends Activity{
                     }
                     default: {
                         msg.what = 0x36;
-                        CurrentUser user = CurrentUser.getOnlyUser();
+
                         user.setUsername(Sname);
                         user.setUserId(json);
                         user.setTaskId(taskId);
@@ -264,19 +276,19 @@ public class SignInActivity extends Activity{
         }
     }
 
-    private class ForgetPasswordListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SignInActivity.this);
-            alertDialogBuilder.setTitle("忘记密码怎么办");
-            alertDialogBuilder.setMessage("请编辑短信，格式为“支付宝账号_用户名，忘记密码”，发送到手机17603902065");
-            alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.cancel();
-                }
-            });
-            alertDialogBuilder.create().show();
-        }
-    }
+//    private class ForgetPasswordListener implements View.OnClickListener {
+//        @Override
+//        public void onClick(View v) {
+//            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SignInActivity.this);
+//            alertDialogBuilder.setTitle("忘记密码怎么办");
+//            alertDialogBuilder.setMessage("请编辑短信，格式为“支付宝账号_用户名，忘记密码”，发送到手机17603902065");
+//            alertDialogBuilder.setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    dialogInterface.cancel();
+//                }
+//            });
+//            alertDialogBuilder.create().show();
+//        }
+//    }
 }

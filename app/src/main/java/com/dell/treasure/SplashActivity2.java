@@ -13,6 +13,7 @@ import com.dell.treasure.share.ShareableActivity;
 import com.dell.treasure.support.CurrentUser;
 import com.dell.treasure.support.JpushReceiver;
 import com.dell.treasure.tasks.TasksActivity;
+import com.orhanobut.logger.Logger;
 
 import java.util.HashMap;
 
@@ -59,7 +60,7 @@ public class SplashActivity2 extends ShareableActivity {
             if (params.containsKey("taskId")) {
                 user.setTaskIdTmp(""+params.get("taskId"));
             }
-            Log.d("result",TAG+"onCreate: "+user.getFromUserId() +" "+user.getTaskIdTmp());
+            Logger.d(TAG+"onCreate: "+user.getFromUserId() +" "+user.getTaskIdTmp());
         }
         int SPLASH_DISPLAY_LENGTH = 1000;
         new Handler().postDelayed(new Runnable() {

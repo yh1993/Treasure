@@ -123,6 +123,7 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.game_no:
+                setCurrenTaskIdToUser();
                 onBack();
                 break;
             case R.id.game_yes:
@@ -140,14 +141,17 @@ public class TaskDetails extends ShareableActivity implements View.OnClickListen
                 break;
         }
     }
-
-    //加入任务
-    private void joinTask() {
-        currenTask.setBeginTime(dateToString(new Date()));
+    private void setCurrenTaskIdToUser(){
         user.setTaskId(""+taskId);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("taskId", taskId);
         editor.apply();
+    }
+
+    //加入任务
+    private void joinTask() {
+        currenTask.setBeginTime(dateToString(new Date()));
+        setCurrenTaskIdToUser();
         new AlertDialog.Builder(TaskDetails.this)
                 .setTitle("提示")
                 .setMessage("是否愿意将任务消息扩散给更多的人？此操作会消耗一些电量，同时您也会得到更多的奖励。")

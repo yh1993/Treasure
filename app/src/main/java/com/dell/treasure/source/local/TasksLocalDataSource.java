@@ -106,6 +106,17 @@ public class TasksLocalDataSource implements TasksDataSource {
     }
 
     @Override
+    public Task getActivieTask() {
+        Query<Task> taskQueryCur = taskDao.queryBuilder().where(TaskDao.Properties.Flag.ge(-2),
+                TaskDao.Properties.Flag.le(-1)).build();
+        List<Task> tasksCur = taskQueryCur.list();
+        if(!tasksCur.isEmpty()){
+            return tasksCur.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public void saveTask(@NonNull Task task) {
         taskDao.insert(task);
     }

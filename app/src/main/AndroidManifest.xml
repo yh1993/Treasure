@@ -212,6 +212,7 @@
         <service android:name=".service.PrepareService"/>
         <!--<service android:name=".service.NetService"/>-->
         <service android:name=".service.UploadService"/>
+        <service android:name=".service.OverTaskUpService"/>
 
 
     </application>
